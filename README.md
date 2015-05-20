@@ -3,7 +3,7 @@
 ## TODOs of todo
 
 - [x] Write README
-- [ ] List
+- [x] List
 - [ ] Add
 - [ ] Delete
 - [ ] Done
