@@ -17,6 +17,13 @@ type Todo struct {
 
 func ReadTodos() ([]Todo, error) {
 	path := getTodosPath()
+	if !fileIsExist(path) {
+		err := createNewFile(path)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -57,4 +64,14 @@ func getTodosPath() string {
 	}
 
 	return filepath.Join(path, ".todo")
+}
+
+func fileIsExist(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func createNewFile(path string) error {
+	_, err := os.Create(path)
+	return err
 }
