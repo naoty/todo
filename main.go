@@ -13,6 +13,6 @@ func main() {
 	app.Email = "naoty.k@gmail.com"
 	app.Version = "0.1.0"
 	app.Usage = "Manage TODOs"
-	app.Commands = []cli.Command{List}
+	app.Commands = []cli.Command{List, Add}
 	app.Run(os.Args)
 }

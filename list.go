@@ -7,13 +7,9 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-const (
-	ENOENT = 2
-)
-
 var List = cli.Command{
 	Name:   "list",
-	Usage:  "list TODOs",
+	Usage:  "List TODOs",
 	Action: list,
 }
 
@@ -21,7 +17,7 @@ func list(context *cli.Context) {
 	todos, err := ReadTodos()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(ENOENT)
+		os.Exit(1)
 	}
 
 	var formatter TodoFormatter = StandardFormatter{Out: os.Stdout, Err: os.Stderr}

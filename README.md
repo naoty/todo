@@ -4,17 +4,23 @@
 
 - [x] Write README
 - [x] List
-- [ ] Add
+- [x] Add
 - [ ] Delete
 - [ ] Done
 - [ ] Undone
 - [ ] Clear
 
+## Installation
+
+```
+$ go get github.com/naoty/todo
+```
+
 ## Usage
 
 ### List
 
-```bash
+```
 $ todo list
 [x] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
@@ -23,7 +29,7 @@ $ todo list
 
 ### Add
 
-```bash
+```
 $ todo add Share the entry on Twitter
 $ todo list
 [x] 001: Learn Golang
@@ -34,7 +40,7 @@ $ todo list
 
 ### Delete
 
-```bash
+```
 $ todo delete 3
 $ todo list
 [x] 001: Learn Golang
@@ -43,7 +49,7 @@ $ todo list
 
 ### Done
 
-```bash
+```
 $ todo done 3
 $ todo list
 [x] 001: Learn Golang
@@ -53,7 +59,7 @@ $ todo list
 
 ### Undone
 
-```bash
+```
 $ todo undone 1
 $ todo list
 [ ] 001: Learn Golang
@@ -63,11 +69,17 @@ $ todo list
 
 ### Clear done TODOs
 
-```bash
+```
 $ todo done 2
 $ todo clear
 $ todo list
 [ ] 003: Publish a blog entry
+```
+
+## Configuration
+
+```
+TODO_PATH: Directory where .todo file saved (Default: HOME)
 ```
 
 ## Author

@@ -15,6 +15,17 @@ type Todo struct {
 	Done   bool
 }
 
+func (todo Todo) Encode() map[string]string {
+	m := make(map[string]string)
+	m["title"] = todo.Title
+	if todo.Done {
+		m["done"] = "true"
+	} else {
+		m["done"] = "false"
+	}
+	return m
+}
+
 func ReadTodos() ([]Todo, error) {
 	path := getTodosPath()
 	if !fileIsExist(path) {
@@ -55,6 +66,41 @@ func ReadTodos() ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func AppendTodo(todo Todo) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	var data []map[string]string
+	for _, todo := range todos {
+		data = append(data, todo.Encode())
+	}
+	data = append(data, todo.Encode())
+
+	path := getTodosPath()
+	if !fileIsExist(path) {
+		err := createNewFile(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	file, err := os.OpenFile(path, os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+
+	writer := goltsv.NewWriter(file)
+
+	err = writer.WriteAll(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getTodosPath() string {
