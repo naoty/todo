@@ -1,15 +1,5 @@
 # todo
 
-## TODOs of todo
-
-- [x] README.md
-- [x] List
-- [x] Add
-- [x] Delete
-- [x] Done
-- [x] Undone
-- [ ] Clear
-
 ## Installation
 
 ```

@@ -167,6 +167,26 @@ func UndoneTodo(num int) error {
 	return WriteTodos(newTodos)
 }
 
+func ClearTodos() error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	err = removeFile()
+	if err != nil {
+		return err
+	}
+
+	var newTodos []Todo
+	for _, todo := range todos {
+		if !todo.Done {
+			newTodos = append(newTodos, todo)
+		}
+	}
+	return WriteTodos(newTodos)
+}
+
 func getTodosPath() string {
 	path := os.Getenv("TODO_PATH")
 	if path == "" {
