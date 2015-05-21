@@ -2,10 +2,10 @@
 
 ## TODOs of todo
 
-- [x] Write README
+- [x] README.md
 - [x] List
 - [x] Add
-- [ ] Delete
+- [x] Delete
 - [ ] Done
 - [ ] Undone
 - [ ] Clear

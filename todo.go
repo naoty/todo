@@ -27,14 +27,14 @@ func (todo Todo) Encode() map[string]string {
 }
 
 func ReadTodos() ([]Todo, error) {
-	path := getTodosPath()
-	if !fileIsExist(path) {
-		err := createNewFile(path)
+	if !fileIsExist() {
+		err := createNewFile()
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	path := getTodosPath()
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -68,26 +68,20 @@ func ReadTodos() ([]Todo, error) {
 	return todos, nil
 }
 
-func AppendTodo(todo Todo) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
+func WriteTodos(todos []Todo) error {
 	var data []map[string]string
 	for _, todo := range todos {
 		data = append(data, todo.Encode())
 	}
-	data = append(data, todo.Encode())
 
-	path := getTodosPath()
-	if !fileIsExist(path) {
-		err := createNewFile(path)
+	if !fileIsExist() {
+		err := createNewFile()
 		if err != nil {
 			return err
 		}
 	}
 
+	path := getTodosPath()
 	file, err := os.OpenFile(path, os.O_RDWR, 0644)
 	if err != nil {
 		return err
@@ -103,6 +97,32 @@ func AppendTodo(todo Todo) error {
 	return nil
 }
 
+func AppendTodo(todo Todo) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	todos = append(todos, todo)
+	return WriteTodos(todos)
+}
+
+func DeleteTodo(num int) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	err = removeFile()
+	if err != nil {
+		return err
+	}
+
+	index := num - 1
+	todos = append(todos[:index], todos[index+1:]...)
+	return WriteTodos(todos)
+}
+
 func getTodosPath() string {
 	path := os.Getenv("TODO_PATH")
 	if path == "" {
@@ -112,12 +132,20 @@ func getTodosPath() string {
 	return filepath.Join(path, ".todo")
 }
 
-func fileIsExist(path string) bool {
+func fileIsExist() bool {
+	path := getTodosPath()
 	_, err := os.Stat(path)
 	return err == nil
 }
 
-func createNewFile(path string) error {
+func createNewFile() error {
+	path := getTodosPath()
 	_, err := os.Create(path)
+	return err
+}
+
+func removeFile() error {
+	path := getTodosPath()
+	err := os.Remove(path)
 	return err
 }
