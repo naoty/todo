@@ -6,8 +6,8 @@
 - [x] List
 - [x] Add
 - [x] Delete
-- [ ] Done
-- [ ] Undone
+- [x] Done
+- [x] Undone
 - [ ] Clear
 
 ## Installation
