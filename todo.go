@@ -123,6 +123,28 @@ func DeleteTodo(num int) error {
 	return WriteTodos(todos)
 }
 
+func DoneTodo(num int) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	err = removeFile()
+	if err != nil {
+		return err
+	}
+
+	newTodos := make([]Todo, len(todos))
+	index := num - 1
+	for i, todo := range todos {
+		if i == index {
+			todo.Done = true
+		}
+		newTodos[i] = todo
+	}
+	return WriteTodos(newTodos)
+}
+
 func getTodosPath() string {
 	path := os.Getenv("TODO_PATH")
 	if path == "" {
