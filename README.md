@@ -17,6 +17,15 @@ $ todo list
 [ ] 003: Publish a blog entry
 ```
 
+`-m` or `--markdown` flag enables to list TODOs as task lists in markdown.
+
+```
+$ todo list -m
+- [x] Learn Golang
+- [ ] Make a todo management tool just for myself
+- [ ] Publish a blog entry
+```
+
 ### Add
 
 ```

@@ -27,3 +27,17 @@ func (f StandardFormatter) Println(todo Todo) {
 	}
 	fmt.Fprintf(f.Out, "%s %03d: %s\n", mark, todo.Number, todo.Title)
 }
+
+type MarkdownFormatter struct {
+	Out, Err io.Writer
+}
+
+func (f MarkdownFormatter) Println(todo Todo) {
+	var mark string
+	if todo.Done {
+		mark = DoneMark
+	} else {
+		mark = UndoneMark
+	}
+	fmt.Fprintf(f.Out, "- %s %s\n", mark, todo.Title)
+}
