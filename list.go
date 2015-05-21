@@ -18,7 +18,7 @@ var List = cli.Command{
 }
 
 func list(context *cli.Context) {
-	todos, err := ReadTodos("/Users/naoty/Dropbox/.todo")
+	todos, err := ReadTodos()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(ENOENT)

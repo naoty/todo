@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/ymotongpoo/goltsv"
 )
@@ -13,7 +15,8 @@ type Todo struct {
 	Done   bool
 }
 
-func ReadTodos(path string) ([]Todo, error) {
+func ReadTodos() ([]Todo, error) {
+	path := getTodosPath()
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -45,4 +48,13 @@ func ReadTodos(path string) ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func getTodosPath() string {
+	path := os.Getenv("TODO_PATH")
+	if path == "" {
+		path = os.Getenv("HOME")
+	}
+
+	return filepath.Join(path, ".todo")
 }
