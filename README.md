@@ -26,6 +26,21 @@ $ todo list -m
 - [ ] Publish a blog entry
 ```
 
+`-u` or `--undone` flag enables to list only undone TODOs.
+
+```
+$ todo list -u
+[ ] 002: Make a todo management tool just for myself
+[ ] 003: Publish a blog entry
+```
+
+`-d` or `--done` flag enables to list only done TODOs.
+
+```
+$ todo list -d
+[x] 001: Learn Golang
+```
+
 ### Add
 
 ```

@@ -13,6 +13,14 @@ var List = cli.Command{
 	Action: list,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
+			Name:  "undone, u",
+			Usage: "Print only undone TODOs",
+		},
+		cli.BoolFlag{
+			Name:  "done, d",
+			Usage: "Print only done TODOs",
+		},
+		cli.BoolFlag{
 			Name:  "markdown, m",
 			Usage: "Print TODOs as task lists in markdown",
 		},
@@ -26,8 +34,6 @@ func list(context *cli.Context) {
 		os.Exit(1)
 	}
 
-	// var formatter TodoFormatter = StandardFormatter{Out: os.Stdout, Err: os.Stderr}
-
 	var formatter TodoFormatter
 	if context.Bool("markdown") {
 		formatter = MarkdownFormatter{Out: os.Stdout, Err: os.Stderr}
@@ -36,6 +42,12 @@ func list(context *cli.Context) {
 	}
 
 	for _, todo := range todos {
+		if context.Bool("undone") && todo.Done {
+			continue
+		}
+		if context.Bool("done") && !todo.Done {
+			continue
+		}
 		formatter.Println(todo)
 	}
 }
