@@ -52,6 +52,17 @@ $ todo list
 [ ] 004: Share the entry on Twitter
 ```
 
+### Move
+
+```
+$ todo move 1 2
+$ todo list
+[ ] 001: Make a todo management tool just for myself
+[x] 002: Learn Golang
+[ ] 003: Publish a blog entry
+[ ] 004: Share the entry on Twitter
+```
+
 ### Delete
 
 ```

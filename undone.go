@@ -16,7 +16,7 @@ var Undone = cli.Command{
 
 func undone(context *cli.Context) {
 	if len(context.Args()) == 0 {
-		cli.ShowCommandHelp(context, "add")
+		cli.ShowCommandHelp(context, "undone")
 		os.Exit(1)
 	}
 

@@ -16,7 +16,7 @@ var Done = cli.Command{
 
 func done(context *cli.Context) {
 	if len(context.Args()) == 0 {
-		cli.ShowCommandHelp(context, "add")
+		cli.ShowCommandHelp(context, "done")
 		os.Exit(1)
 	}
 

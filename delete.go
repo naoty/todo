@@ -16,7 +16,7 @@ var Delete = cli.Command{
 
 func delete(context *cli.Context) {
 	if len(context.Args()) == 0 {
-		cli.ShowCommandHelp(context, "add")
+		cli.ShowCommandHelp(context, "delete")
 		os.Exit(1)
 	}
 
