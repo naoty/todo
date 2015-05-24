@@ -52,6 +52,15 @@ $ todo list
 [ ] 004: Share the entry on Twitter
 ```
 
+### Delete
+
+```
+$ todo delete 3
+$ todo list
+[x] 001: Learn Golang
+[ ] 002: Make a todo management tool just for myself
+```
+
 ### Move
 
 ```
@@ -63,13 +72,15 @@ $ todo list
 [ ] 004: Share the entry on Twitter
 ```
 
-### Delete
+### Rename
 
 ```
-$ todo delete 3
+$ todo rename 4 Share the entry on Twitter and Facebook
 $ todo list
 [x] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
+[ ] 003: Publish a blog entry
+[ ] 004: Share the entry on Twitter and Facebook
 ```
 
 ### Done

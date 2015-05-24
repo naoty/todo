@@ -107,6 +107,22 @@ func AppendTodo(todo Todo) error {
 	return WriteTodos(todos)
 }
 
+func DeleteTodo(num int) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	err = removeFile()
+	if err != nil {
+		return err
+	}
+
+	index := num - 1
+	todos = append(todos[:index], todos[index+1:]...)
+	return WriteTodos(todos)
+}
+
 func MoveTodo(from, to int) error {
 	todos, err := ReadTodos()
 	if err != nil {
@@ -125,7 +141,7 @@ func MoveTodo(from, to int) error {
 	return WriteTodos(todos)
 }
 
-func DeleteTodo(num int) error {
+func RenameTodo(num int, title string) error {
 	todos, err := ReadTodos()
 	if err != nil {
 		return err
@@ -137,7 +153,7 @@ func DeleteTodo(num int) error {
 	}
 
 	index := num - 1
-	todos = append(todos[:index], todos[index+1:]...)
+	todos[index].Title = title
 	return WriteTodos(todos)
 }
 
