@@ -108,117 +108,68 @@ func AppendTodo(todo Todo) error {
 }
 
 func DeleteTodo(num int) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	index := num - 1
-	todos = append(todos[:index], todos[index+1:]...)
-	return WriteTodos(todos)
+	return rewriteFile(func(todos []Todo) []Todo {
+		index := num - 1
+		return append(todos[:index], todos[index+1:]...)
+	})
 }
 
 func MoveTodo(from, to int) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	fromIndex, toIndex := from-1, to-1
-	movedTodo := todos[fromIndex]
-	todos = append(todos[:fromIndex], todos[fromIndex+1:]...)
-	todos = append(todos[:toIndex], append([]Todo{movedTodo}, todos[toIndex:]...)...)
-	return WriteTodos(todos)
+	return rewriteFile(func(todos []Todo) []Todo {
+		fromIndex, toIndex := from-1, to-1
+		movedTodo := todos[fromIndex]
+		todos = append(todos[:fromIndex], todos[fromIndex+1:]...)
+		todos = append(todos[:toIndex], append([]Todo{movedTodo}, todos[toIndex:]...)...)
+		return todos
+	})
 }
 
 func RenameTodo(num int, title string) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	index := num - 1
-	todos[index].Title = title
-	return WriteTodos(todos)
+	return rewriteFile(func(todos []Todo) []Todo {
+		index := num - 1
+		todos[index].Title = title
+		return todos
+	})
 }
 
 func DoneTodo(num int) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	newTodos := make([]Todo, len(todos))
-	index := num - 1
-	for i, todo := range todos {
-		if i == index {
-			todo.Done = true
+	return rewriteFile(func(todos []Todo) []Todo {
+		newTodos := make([]Todo, len(todos))
+		index := num - 1
+		for i, todo := range todos {
+			if i == index {
+				todo.Done = true
+			}
+			newTodos[i] = todo
 		}
-		newTodos[i] = todo
-	}
-	return WriteTodos(newTodos)
+		return newTodos
+	})
 }
 
 func UndoneTodo(num int) error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	newTodos := make([]Todo, len(todos))
-	index := num - 1
-	for i, todo := range todos {
-		if i == index {
-			todo.Done = false
+	return rewriteFile(func(todos []Todo) []Todo {
+		newTodos := make([]Todo, len(todos))
+		index := num - 1
+		for i, todo := range todos {
+			if i == index {
+				todo.Done = false
+			}
+			newTodos[i] = todo
 		}
-		newTodos[i] = todo
-	}
-	return WriteTodos(newTodos)
+		return newTodos
+	})
 }
 
 func ClearTodos() error {
-	todos, err := ReadTodos()
-	if err != nil {
-		return err
-	}
-
-	err = removeFile()
-	if err != nil {
-		return err
-	}
-
-	var newTodos []Todo
-	for _, todo := range todos {
-		if !todo.Done {
-			newTodos = append(newTodos, todo)
+	return rewriteFile(func(todos []Todo) []Todo {
+		var newTodos []Todo
+		for _, todo := range todos {
+			if !todo.Done {
+				newTodos = append(newTodos, todo)
+			}
 		}
-	}
-	return WriteTodos(newTodos)
+		return newTodos
+	})
 }
 
 func getTodosPath() string {
@@ -240,6 +191,22 @@ func createNewFile() error {
 	path := getTodosPath()
 	_, err := os.Create(path)
 	return err
+}
+
+func rewriteFile(f func([]Todo) []Todo) error {
+	todos, err := ReadTodos()
+	if err != nil {
+		return err
+	}
+
+	err = removeFile()
+	if err != nil {
+		return err
+	}
+
+	newTodos := f(todos)
+
+	return WriteTodos(newTodos)
 }
 
 func removeFile() error {
