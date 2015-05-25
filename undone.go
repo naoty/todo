@@ -20,13 +20,19 @@ func undone(context *cli.Context) {
 		os.Exit(1)
 	}
 
-	num, err := strconv.Atoi(context.Args().First())
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	var err error
+	nums := []int{}
+
+	for _, arg := range context.Args() {
+		num, err := strconv.Atoi(arg)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		nums = append(nums, num)
 	}
 
-	err = UndoneTodo(num)
+	err = UndoneTodo(nums...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -146,16 +146,24 @@ func RenameTodo(num int, title string) error {
 	})
 }
 
-func DoneTodo(num int) error {
+func DoneTodo(nums ...int) error {
 	return rewriteFile(func(todos []Todo) ([]Todo, error) {
-		index := num - 1
-		if index >= len(todos) {
-			return nil, errors.New("Index out of bounds.")
+		var err error
+		indices := make([]int, len(nums))
+		for _, num := range nums {
+			index := num - 1
+			if index >= len(todos) {
+				err = errors.New("Index out of bounds.")
+			}
+			indices = append(indices, index)
+		}
+		if err != nil {
+			return nil, err
 		}
 
 		newTodos := make([]Todo, len(todos))
 		for i, todo := range todos {
-			if i == index {
+			if contains(indices, i) {
 				todo.Done = true
 			}
 			newTodos[i] = todo
@@ -164,16 +172,24 @@ func DoneTodo(num int) error {
 	})
 }
 
-func UndoneTodo(num int) error {
+func UndoneTodo(nums ...int) error {
 	return rewriteFile(func(todos []Todo) ([]Todo, error) {
-		index := num - 1
-		if index >= len(todos) {
-			return nil, errors.New("Index out of bounds.")
+		var err error
+		indices := make([]int, len(nums))
+		for _, num := range nums {
+			index := num - 1
+			if index >= len(todos) {
+				err = errors.New("Index out of bounds.")
+			}
+			indices = append(indices, index)
+		}
+		if err != nil {
+			return nil, err
 		}
 
 		newTodos := make([]Todo, len(todos))
 		for i, todo := range todos {
-			if i == index {
+			if contains(indices, i) {
 				todo.Done = false
 			}
 			newTodos[i] = todo
@@ -240,4 +256,13 @@ func removeFile() error {
 	path := getTodosPath()
 	err := os.Remove(path)
 	return err
+}
+
+func contains(xs []int, n int) bool {
+	for _, x := range xs {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }
