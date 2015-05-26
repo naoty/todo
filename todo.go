@@ -149,7 +149,7 @@ func RenameTodo(num int, title string) error {
 func DoneTodo(nums ...int) error {
 	return rewriteFile(func(todos []Todo) ([]Todo, error) {
 		var err error
-		indices := make([]int, len(nums))
+		var indices []int
 		for _, num := range nums {
 			index := num - 1
 			if index >= len(todos) {
@@ -175,7 +175,7 @@ func DoneTodo(nums ...int) error {
 func UndoneTodo(nums ...int) error {
 	return rewriteFile(func(todos []Todo) ([]Todo, error) {
 		var err error
-		indices := make([]int, len(nums))
+		var indices []int
 		for _, num := range nums {
 			index := num - 1
 			if index >= len(todos) {
