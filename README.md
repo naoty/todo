@@ -1,4 +1,4 @@
-# todo
+# todo [![Build Status](https://travis-ci.org/naoty/todo.svg?branch=master)](https://travis-ci.org/naoty/todo)
 
 ## Installation
 
