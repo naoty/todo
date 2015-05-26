@@ -10,7 +10,7 @@ import (
 
 var Done = cli.Command{
 	Name:   "done",
-	Usage:  "Done a TODO",
+	Usage:  "Done TODOs",
 	Action: done,
 }
 

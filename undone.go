@@ -10,7 +10,7 @@ import (
 
 var Undone = cli.Command{
 	Name:   "undone",
-	Usage:  "Undone a TODO",
+	Usage:  "Undone TODOs",
 	Action: undone,
 }
 

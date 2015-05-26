@@ -86,21 +86,21 @@ $ todo list
 ### Done
 
 ```
-$ todo done 3
+$ todo done 2 3
 $ todo list
 [x] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
+[x] 002: Make a todo management tool just for myself
 [x] 003: Publish a blog entry
 ```
 
 ### Undone
 
 ```
-$ todo undone 1
+$ todo undone 1 2
 $ todo list
 [ ] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
+[x] 003: Publish a blog entry
 ```
 
 ### Clear done TODOs
@@ -109,7 +109,7 @@ $ todo list
 $ todo done 2
 $ todo clear
 $ todo list
-[ ] 003: Publish a blog entry
+[ ] 001: Learn Golang
 ```
 
 ## Configuration
