@@ -52,6 +52,23 @@ $ todo list
 [ ] 004: Share the entry on Twitter
 ```
 
+`-o` or `--once` flag enables to add a TODO only if it exists.
+
+```
+$ todo add Share the entry on Twitter
+$ todo list
+[x] 001: Learn Golang
+[ ] 002: Make a todo management tool just for myself
+[ ] 003: Publish a blog entry
+[ ] 004: Share the entry on Twitter
+$ todo add --once Share the entry on Twitter
+$ todo list
+[x] 001: Learn Golang
+[ ] 002: Make a todo management tool just for myself
+[ ] 003: Publish a blog entry
+[ ] 004: Share the entry on Twitter
+```
+
 ### Delete
 
 ```
