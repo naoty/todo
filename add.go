@@ -18,18 +18,37 @@ var Add = cli.Command{
 		}
 
 		title := strings.Join(context.Args(), " ")
-		add := addProcess(title)
+		add := addProcess(title, context.Bool("once"))
 		err := UpdateTodos(add)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 	},
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "once, o",
+			Usage: "Add the TODO only if it exists",
+		},
+	},
 }
 
-func addProcess(title string) process {
+func addProcess(title string, once bool) process {
 	return func(todos []Todo) ([]Todo, error) {
+		if once && todoExist(todos, title) {
+			return todos, nil
+		}
+
 		todo := Todo{Title: title, Done: false}
 		return append(todos, todo), nil
 	}
+}
+
+func todoExist(todos []Todo, title string) bool {
+	for _, todo := range todos {
+		if todo.Title == title {
+			return true
+		}
+	}
+	return false
 }
