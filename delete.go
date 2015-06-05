@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/codegangsta/cli"
 )
@@ -18,13 +17,14 @@ var Delete = cli.Command{
 			os.Exit(1)
 		}
 
-		num, err := strconv.Atoi(context.Args()[0])
+		// num, err := strconv.Atoi(context.Args()[0])
+		nums, err := Atois(context.Args())
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 
-		delete := deleteProcess(num)
+		delete := deleteProcess(nums...)
 		err = UpdateTodos(delete)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -33,13 +33,29 @@ var Delete = cli.Command{
 	},
 }
 
-func deleteProcess(num int) process {
+func deleteProcess(nums ...int) process {
 	return func(todos []Todo) ([]Todo, error) {
-		index := num - 1
-		if index >= len(todos) {
-			return nil, errors.New("Index out of bounds.")
+		var indices []int
+		var err error
+
+		for _, num := range nums {
+			index := num - 1
+			if index >= len(todos) {
+				err = errors.New("Index out of bounds.")
+			}
+			indices = append(indices, index)
+		}
+		if err != nil {
+			return nil, err
 		}
 
-		return append(todos[:index], todos[index+1:]...), nil
+		var newTodos []Todo
+		for i, todo := range todos {
+			if !Contains(indices, i) {
+				newTodos = append(newTodos, todo)
+			}
+		}
+
+		return newTodos, nil
 	}
 }
