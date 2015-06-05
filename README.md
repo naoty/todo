@@ -72,10 +72,9 @@ $ todo list
 ### Delete
 
 ```
-$ todo delete 3
+$ todo delete 2 3
 $ todo list
 [x] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
 ```
 
 ### Move
