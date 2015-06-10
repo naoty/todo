@@ -52,7 +52,7 @@ $ todo list
 [ ] 004: Share the entry on Twitter
 ```
 
-`-o` or `--once` flag enables to add a TODO only if it exists.
+`-o` or `--once` flag enables to add a TODO only if it doesn't exist.
 
 ```
 $ todo add Share the entry on Twitter
