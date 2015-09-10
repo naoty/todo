@@ -6,4 +6,4 @@ deps:
 	go get github.com/ymotongpoo/goltsv
 
 test:
-	go test
+	go test ./...
