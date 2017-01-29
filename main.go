@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/naoty/todo/command"
 	"github.com/urfave/cli"
 )
 
@@ -13,6 +14,11 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "todo"
 	app.Version = Version
-	app.Usage = "manage todos"
+	app.Usage = "Manage todos"
+	app.Author = "Naoto Kaneko"
+	app.Email = "naoty.k@gmail.com"
+	app.Commands = []cli.Command{
+		command.Add,
+	}
 	app.Run(os.Args)
 }
