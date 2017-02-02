@@ -2,17 +2,17 @@ package command
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
 )
 
-const filename = ".todo"
+const filename = ".todo.json"
 
 // Add is a command to add a todo.
 var Add = cli.Command{
@@ -22,52 +22,45 @@ var Add = cli.Command{
 }
 
 func add(c *cli.Context) error {
-	if c.NArg() < 2 {
+	if c.NArg() < 1 {
 		cli.ShowCommandHelp(c, "add")
 		return nil
 	}
 
+	// Get a path for a todo file
 	dir := os.Getenv("TODO_PATH")
-
 	if dir == "" {
 		dir = os.Getenv("HOME")
 	}
 
-	if dir == "" && runtime.GOOS == "windows" {
-		dir = os.Getenv("APPDATA")
-	}
-
-	if dir == "" {
-		return errors.New("Failed to get a directory for .todo file")
-	}
-
 	path := filepath.Join(dir, filename)
 
-	var f *os.File
-
-	if _, err := os.Stat(path); err != nil {
-		f, err = os.Create(path)
-		if err != nil {
-			return err
-		}
-	} else {
-		f, err = os.OpenFile(path, os.O_RDWR, 0644)
-		if err != nil {
-			return err
-		}
+	// Read data
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("Failed to read data: %v", err)
 	}
 
-	defer f.Close()
+	// Decode data
+	var todos []todo.Todo
+	if err = json.Unmarshal(data, &todos); err != nil {
+		return fmt.Errorf("Failed to decode data: %v", err)
+	}
 
-	enc := json.NewEncoder(f)
-
+	// Append a todo
 	title := strings.Join(c.Args(), " ")
 	todo := todo.Todo{Title: title, Done: false}
-	err := enc.Encode(todo)
+	todos = append(todos, todo)
 
+	// Encode data
+	indent := strings.Repeat(" ", 4)
+	json, err := json.MarshalIndent(todos, "", indent)
 	if err != nil {
-		return cli.NewExitError("Failed to encode a todo", 1)
+		return fmt.Errorf("Failed to encode data: %v", err)
 	}
+
+	// Write json
+	ioutil.WriteFile(path, json, 0644)
 
 	return nil
 }
