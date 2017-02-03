@@ -23,6 +23,7 @@ func main() {
 		command.Done,
 		command.Undone,
 		command.Delete,
+		command.Move,
 	}
 	app.Run(os.Args)
 }
