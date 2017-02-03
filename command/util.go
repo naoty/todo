@@ -16,7 +16,7 @@ func todoFilePath() string {
 	if dir == "" {
 		dir = os.Getenv("HOME")
 	}
-	path := filepath.Join(dir, filename)
+	path := filepath.Join(dir, ".todo.json")
 	return path
 }
 
