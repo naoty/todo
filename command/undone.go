@@ -6,16 +6,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Done is a command to mark a todo as done.
-var Done = cli.Command{
-	Name:   "done",
-	Usage:  "Mark todos as done",
-	Action: done,
+// Undone is a command to mark a todo as undone.
+var Undone = cli.Command{
+	Name:   "undone",
+	Usage:  "Mark todos as undone",
+	Action: undone,
 }
 
-func done(c *cli.Context) error {
+func undone(c *cli.Context) error {
 	if c.NArg() == 0 {
-		cli.ShowCommandHelp(c, "done")
+		cli.ShowCommandHelp(c, "undone")
 		return nil
 	}
 
@@ -38,7 +38,7 @@ func done(c *cli.Context) error {
 		}
 
 		todo := todos[i]
-		todo.Done = true
+		todo.Done = false
 		todos[i] = todo
 	}
 
