@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
 )
 
@@ -22,6 +23,13 @@ func list(c *cli.Context) error {
 	}
 
 	// Print todos
+	buf := formatTodos(todos, "")
+	fmt.Printf("%v\n", strings.Join(buf, "\n"))
+
+	return nil
+}
+
+func formatTodos(todos []todo.Todo, indent string) []string {
 	buf := []string{}
 	for i, todo := range todos {
 		var mark string
@@ -30,9 +38,11 @@ func list(c *cli.Context) error {
 		} else {
 			mark = "[ ]"
 		}
-		buf = append(buf, fmt.Sprintf("%s %03d: %s", mark, i+1, todo.Title))
-	}
-	fmt.Printf("%v\n", strings.Join(buf, "\n"))
+		buf = append(buf, fmt.Sprintf("%s%s %03d: %s", indent, mark, i+1, todo.Title))
 
-	return nil
+		extraIndent := strings.Repeat(" ", 2)
+		subtodos := formatTodos(todo.Todos, indent+extraIndent)
+		buf = append(buf, subtodos...)
+	}
+	return buf
 }
