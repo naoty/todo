@@ -19,6 +19,7 @@ func main() {
 	app.Email = "naoty.k@gmail.com"
 	app.Commands = []cli.Command{
 		command.Add,
+		command.List,
 	}
 	app.Run(os.Args)
 }
