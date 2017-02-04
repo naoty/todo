@@ -24,6 +24,7 @@ func main() {
 		command.Undone,
 		command.Delete,
 		command.Move,
+		command.Clear,
 	}
 	app.Run(os.Args)
 }
