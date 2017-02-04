@@ -67,7 +67,7 @@ func addTodo(todo todo.Todo, todos []todo.Todo, orders []int) []todo.Todo {
 
 	t := todos[i]
 	if len(orders) == 1 {
-		t.Todos = append(todo.Todos, todo)
+		t.Todos = append(t.Todos, todo)
 	} else {
 		t.Todos = addTodo(todo, t.Todos, orders[1:])
 	}
