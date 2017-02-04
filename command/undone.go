@@ -2,7 +2,9 @@ package command
 
 import (
 	"strconv"
+	"strings"
 
+	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
 )
 
@@ -26,20 +28,15 @@ func undone(c *cli.Context) error {
 	}
 
 	for _, arg := range c.Args() {
-		order, err2 := strconv.Atoi(arg)
-
-		if err2 != nil {
-			continue
+		var orders []int
+		for _, id := range strings.Split(arg, "-") {
+			order, err2 := strconv.Atoi(id)
+			if err2 == nil {
+				orders = append(orders, order)
+			}
 		}
 
-		i := order - 1
-		if i >= len(todos) {
-			continue
-		}
-
-		todo := todos[i]
-		todo.Done = false
-		todos[i] = todo
+		todos = undoneTodos(todos, orders)
 	}
 
 	err = writeTodos(todos, path)
@@ -48,4 +45,25 @@ func undone(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func undoneTodos(todos []todo.Todo, orders []int) []todo.Todo {
+	if len(orders) == 0 {
+		return todos
+	}
+
+	i := orders[0] - 1
+	if i >= len(todos) {
+		return todos
+	}
+
+	todo := todos[i]
+	if len(todo.Todos) == 0 || len(orders) == 1 {
+		todo.Done = false
+	} else {
+		todo.Todos = undoneTodos(todo.Todos, orders[1:])
+	}
+	todos[i] = todo
+
+	return todos
 }
