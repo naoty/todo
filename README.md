@@ -12,129 +12,87 @@ $ go get github.com/naoty/todo
 
 ```
 $ todo list
-[x] 001: Learn Golang
+[ ] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
 ```
 
-`-m` or `--markdown` flag enables to list TODOs as task lists in markdown.
+### Add/Delete
 
 ```
-$ todo list -m
-- [x] Learn Golang
-- [ ] Make a todo management tool just for myself
-- [ ] Publish a blog entry
-```
-
-`-u` or `--undone` flag enables to list only undone TODOs.
-
-```
-$ todo list -u
+$ todo add Get things done
+$ todo list
+[ ] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
+[ ] 003: Get things done
 ```
 
-`-d` or `--done` flag enables to list only done TODOs.
+```
+$ todo delete 3
+$ todo list
+[ ] 001: Learn Golang
+[ ] 002: Make a todo management tool just for myself
+```
+
+### Done/Undone
 
 ```
-$ todo list -d
+$ todo done 1 2
+$ todo list
 [x] 001: Learn Golang
+[x] 002: Make a todo management tool just for myself
 ```
 
-### Add
-
 ```
-$ todo add Share the entry on Twitter
+$ todo undone 2
 $ todo list
 [x] 001: Learn Golang
 [ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
-[ ] 004: Share the entry on Twitter
-```
-
-`-o` or `--once` flag enables to add a TODO only if it doesn't exist.
-
-```
-$ todo add Share the entry on Twitter
-$ todo list
-[x] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
-[ ] 004: Share the entry on Twitter
-$ todo add --once Share the entry on Twitter
-$ todo list
-[x] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
-[ ] 004: Share the entry on Twitter
-```
-
-### Delete
-
-```
-$ todo delete 2 3
-$ todo list
-[x] 001: Learn Golang
 ```
 
 ### Move
 
 ```
-$ todo move 1 2
+$ todo move 2 1
 $ todo list
 [ ] 001: Make a todo management tool just for myself
 [x] 002: Learn Golang
-[ ] 003: Publish a blog entry
-[ ] 004: Share the entry on Twitter
 ```
 
-### Rename
+### Clear
 
 ```
-$ todo rename 4 Share the entry on Twitter and Facebook
-$ todo list
-[x] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
-[ ] 003: Publish a blog entry
-[ ] 004: Share the entry on Twitter and Facebook
-```
-
-### Done
-
-```
-$ todo done 2 3
-$ todo list
-[x] 001: Learn Golang
-[x] 002: Make a todo management tool just for myself
-[x] 003: Publish a blog entry
-```
-
-### Undone
-
-```
-$ todo undone 1 2
-$ todo list
-[ ] 001: Learn Golang
-[ ] 002: Make a todo management tool just for myself
-[x] 003: Publish a blog entry
-```
-
-### Clear done TODOs
-
-```
-$ todo done 2
 $ todo clear
 $ todo list
+[ ] 001: Make a todo management tool just for myself
+```
+
+### Subtodo
+
+```
+$ todo add -p 1 Try 'A Tour of Go'
+$ todo add -p 1 Read 'Effective Go'
+$ todo list
 [ ] 001: Learn Golang
+  [ ] 001: Try 'A Tour of Go'
+  [ ] 002: Read 'Effective Go'
+[ ] 002: Make a todo management tool just for myself
+```
+
+```
+$ todo done 1-1
+$ todo list
+[ ] 001: Learn Golang
+  [x] 001: Try 'A Tour of Go'
+  [ ] 002: Read 'Effective Go'
+[ ] 002: Make a todo management tool just for myself
 ```
 
 ## Configuration
 
 ```
-TODO_PATH: Directory where .todo file saved (Default: HOME)
+TODO_PATH: Directory where .todo.json file saved (Default: HOME)
 ```
 
 ## Author
 
 [naoty](https://github.com/naoty)
-
