@@ -2,6 +2,7 @@ package command
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
@@ -20,29 +21,25 @@ func delete(c *cli.Context) error {
 		return nil
 	}
 
-	orders := make([]int, len(c.Args()))
-	for _, arg := range c.Args() {
-		order, err := strconv.Atoi(arg)
-		if err == nil {
-			orders = append(orders, order)
-		}
-	}
-
 	path := todoFilePath()
 	todos, err := readTodos(path)
 	if err != nil {
 		return err
 	}
 
-	var newTodos []todo.Todo
-	for i, todo := range todos {
-		order := i + 1
-		if !contains(orders, order) {
-			newTodos = append(newTodos, todo)
+	for _, arg := range c.Args() {
+		var orders []int
+		for _, id := range strings.Split(arg, "-") {
+			order, err2 := strconv.Atoi(id)
+			if err2 == nil {
+				orders = append(orders, order)
+			}
 		}
+
+		todos = deleteTodo(todos, orders)
 	}
 
-	err = writeTodos(newTodos, path)
+	err = writeTodos(todos, path)
 	if err != nil {
 		return err
 	}
@@ -50,11 +47,31 @@ func delete(c *cli.Context) error {
 	return nil
 }
 
-func contains(ns []int, n int) bool {
-	for _, e := range ns {
-		if e == n {
-			return true
-		}
+func deleteTodo(todos []todo.Todo, orders []int) []todo.Todo {
+	if len(orders) == 0 || len(todos) == 0 {
+		return todos
 	}
-	return false
+
+	i := orders[0] - 1
+	if i >= len(todos) {
+		return todos
+	}
+
+	if len(orders) == 1 {
+		if len(todos) == 1 {
+			return []todo.Todo{}
+		}
+
+		if i+1 >= len(todos) {
+			return todos[:i]
+		}
+
+		return append(todos[:i], todos[i+1:]...)
+	}
+
+	todo := todos[i]
+	todo.Todos = deleteTodo(todo.Todos, orders[1:])
+	todos[i] = todo
+
+	return todos
 }
