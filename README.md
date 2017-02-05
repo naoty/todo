@@ -1,6 +1,11 @@
-# todo [![Build Status](https://travis-ci.org/naoty/todo.svg?branch=master)](https://travis-ci.org/naoty/todo)
+# todo
 
 ## Installation
+
+### stable
+Visit [latest release](https://github.com/naoty/todo/releases/latest) and download binary.
+
+### master
 
 ```
 $ go get github.com/naoty/todo
