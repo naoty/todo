@@ -58,6 +58,15 @@ $ todo list
 [x] 002: Learn Golang
 ```
 
+### Rename
+
+```
+$ todo rename 2 Learn Golang again
+$ todo list
+[ ] 001: Make a todo management tool just for myself
+[x] 002: Learn Golang again
+```
+
 ### Clear
 
 ```
