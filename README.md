@@ -2,13 +2,9 @@
 
 ## Installation
 
-### stable
-Visit [latest release](https://github.com/naoty/todo/releases/latest) and download binary.
-
-### master
-
 ```
-$ go get github.com/naoty/todo
+$ brew tap naoty/misc
+$ brew install todo
 ```
 
 ## Usage
