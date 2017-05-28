@@ -1,9 +1,6 @@
 package command
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
 )
@@ -28,14 +25,7 @@ func undone(c *cli.Context) error {
 	}
 
 	for _, arg := range c.Args() {
-		var orders []int
-		for _, id := range strings.Split(arg, "-") {
-			order, err2 := strconv.Atoi(id)
-			if err2 == nil {
-				orders = append(orders, order)
-			}
-		}
-
+		orders := splitOrder(arg)
 		todos = undoneTodos(todos, orders)
 	}
 

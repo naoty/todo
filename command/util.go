@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/naoty/todo/todo"
@@ -65,4 +66,15 @@ func initFileIfNotExist(path string) error {
 	}
 
 	return nil
+}
+
+func splitOrder(order string) []int {
+	orders := []int{}
+	for _, id := range strings.Split(order, "-") {
+		order, err := strconv.Atoi(id)
+		if err == nil {
+			orders = append(orders, order)
+		}
+	}
+	return orders
 }

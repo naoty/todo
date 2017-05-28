@@ -1,7 +1,6 @@
 package command
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/naoty/todo/todo"
@@ -27,12 +26,7 @@ func rename(c *cli.Context) error {
 		return err
 	}
 
-	var orders []int
-	for _, id := range strings.Split(c.Args()[0], "-") {
-		if order, err2 := strconv.Atoi(id); err2 == nil {
-			orders = append(orders, order)
-		}
-	}
+	orders := splitOrder(c.Args()[0])
 
 	title := strings.Join(c.Args()[1:], " ")
 	todos = renameTodos(todos, title, orders)
