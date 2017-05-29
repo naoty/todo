@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.1
+
+### Fixed
+* Fix a bug to delete multiple TODOs.
+
 ## 0.2.0
 
 ### Added
