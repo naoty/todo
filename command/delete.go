@@ -26,8 +26,9 @@ func delete(c *cli.Context) error {
 
 	for _, arg := range c.Args() {
 		orders := splitOrder(arg)
-		todos = deleteTodo(todos, orders)
+		todos = trashTodos(todos, orders)
 	}
+	todos = cleanTrashedTodos(todos)
 
 	err = writeTodos(todos, path)
 	if err != nil {
@@ -37,31 +38,38 @@ func delete(c *cli.Context) error {
 	return nil
 }
 
-func deleteTodo(todos []todo.Todo, orders []int) []todo.Todo {
-	if len(orders) == 0 || len(todos) == 0 {
+func trashTodos(todos []todo.Todo, orders []int) []todo.Todo {
+	if len(orders) == 0 {
 		return todos
 	}
 
 	i := orders[0] - 1
-	if i >= len(todos) {
+	if i > len(todos)-1 {
 		return todos
 	}
 
-	if len(orders) == 1 {
-		if len(todos) == 1 {
-			return []todo.Todo{}
-		}
-
-		if i+1 >= len(todos) {
-			return todos[:i]
-		}
-
-		return append(todos[:i], todos[i+1:]...)
-	}
-
 	todo := todos[i]
-	todo.Todos = deleteTodo(todo.Todos, orders[1:])
+	if len(todo.Todos) == 0 || len(orders) == 1 {
+		todo.Trashed = true
+	} else {
+		todo.Todos = trashTodos(todo.Todos, orders[1:])
+	}
 	todos[i] = todo
 
 	return todos
+}
+
+func cleanTrashedTodos(todos []todo.Todo) []todo.Todo {
+	newTodos := []todo.Todo{}
+
+	for _, todo := range todos {
+		if todo.Trashed {
+			continue
+		}
+
+		todo.Todos = cleanTrashedTodos(todo.Todos)
+		newTodos = append(newTodos, todo)
+	}
+
+	return newTodos
 }
