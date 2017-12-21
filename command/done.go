@@ -13,20 +13,19 @@ var Done = cli.Command{
 }
 
 func done(c *cli.Context) error {
-	if c.NArg() == 0 {
-		cli.ShowCommandHelp(c, "done")
-		return nil
-	}
-
 	path := todoFilePath()
 	todos, err := readTodos(path)
 	if err != nil {
 		return err
 	}
 
-	for _, arg := range c.Args() {
-		orders := splitOrder(arg)
-		todos = doneTodos(todos, orders)
+	if c.NArg() == 0 {
+		todos, _ = doneNextTodoFromTodos(todos)
+	} else {
+		for _, arg := range c.Args() {
+			orders := splitOrder(arg)
+			todos = doneTodos(todos, orders)
+		}
 	}
 
 	err = writeTodos(todos, path)
@@ -56,4 +55,32 @@ func doneTodos(todos []todo.Todo, orders []int) []todo.Todo {
 	todos[i] = todo
 
 	return todos
+}
+
+func doneNextTodoFromTodos(todos []todo.Todo) ([]todo.Todo, bool) {
+	done := false
+
+	for i, todo := range todos {
+		if todo.Done {
+			continue
+		}
+
+		if len(todo.Todos) > 0 {
+			todo.Todos, done = doneNextTodoFromTodos(todo.Todos)
+			if !done {
+				todo.Done = true
+				done = true
+			}
+		} else {
+			todo.Done = true
+			done = true
+		}
+		todos[i] = todo
+
+		if done {
+			break
+		}
+	}
+
+	return todos, done
 }
