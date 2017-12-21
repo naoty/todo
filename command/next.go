@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 
+	"github.com/naoty/todo/todo"
 	"github.com/urfave/cli"
 )
 
@@ -19,13 +20,26 @@ func next(c *cli.Context) error {
 		return err
 	}
 
+	todo, found := nextTodoFromTodos(todos)
+	if found {
+		fmt.Println(todo.Title)
+	}
+
+	return nil
+}
+
+func nextTodoFromTodos(todos []todo.Todo) (todo.Todo, bool) {
 	for _, todo := range todos {
 		if todo.Done {
 			continue
 		}
-		fmt.Printf("%s\n", todo.Title)
-		return nil
+
+		if len(todo.Todos) > 0 {
+			return nextTodoFromTodos(todo.Todos)
+		}
+
+		return todo, true
 	}
 
-	return nil
+	return todo.Todo{}, false
 }
