@@ -50,6 +50,13 @@ $ todo list
 [ ] 002: Make a todo management tool just for myself
 ```
 
+### Next
+
+```
+$ todo next
+Make a todo management tool just for myself
+```
+
 ### Move
 
 ```

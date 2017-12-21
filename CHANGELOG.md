@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.3.0
+
+## Added
+* `next` command to show a next undone todo.
+
+## Changed
+* `done` command without any orders marks a next undone todo as done.
+
 ## 0.2.1
 
 ### Fixed
