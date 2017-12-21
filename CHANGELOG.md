@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.3.1
+
+## Fixed
+* Fix `next` command to show a todo when the subtodos of the todo are all done. 
+
 ## 0.3.0
 
 ## Added
