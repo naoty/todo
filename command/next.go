@@ -35,7 +35,11 @@ func nextTodoFromTodos(todos []todo.Todo) (todo.Todo, bool) {
 		}
 
 		if len(todo.Todos) > 0 {
-			return nextTodoFromTodos(todo.Todos)
+			subtodo, found := nextTodoFromTodos(todo.Todos)
+			if found {
+				return subtodo, true
+			}
+			return todo, true
 		}
 
 		return todo, true
