@@ -26,6 +26,7 @@ func main() {
 		command.Move,
 		command.Clear,
 		command.Rename,
+		command.Next,
 	}
 	app.Run(os.Args)
 }
