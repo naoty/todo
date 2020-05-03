@@ -20,11 +20,17 @@ func NewRoot(cli CLI) Command {
 func (c *Root) Run(args []string) int {
 	flagset := pflag.NewFlagSet("", pflag.ExitOnError)
 	help := flagset.BoolP("help", "h", false, "")
+	version := flagset.BoolP("version", "v", false, "")
 
 	flagset.Parse(args)
 
 	if *help {
 		fmt.Fprintln(c.Writer, usage())
+		return 0
+	}
+
+	if *version {
+		fmt.Fprintln(c.Writer, c.Version)
 		return 0
 	}
 

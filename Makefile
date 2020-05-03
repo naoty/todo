@@ -1,3 +1,5 @@
+VERSION ?= $$(git describe --tags)
+
 .PHONY: build
 build:
-	go build -o bin/todo
+	go build -ldflags "-X main.Version=$(VERSION)" -o bin/todo

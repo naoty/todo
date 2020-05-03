@@ -12,6 +12,7 @@ type Command interface {
 
 // CLI represents an I/O against CLI.
 type CLI struct {
+	Version     string
 	Reader      io.Reader
 	Writer      io.Writer
 	ErrorWriter io.Writer
@@ -33,9 +34,11 @@ func usage() string {
 	message := `
 Usage:
   todo -h | --help
+  todo -v | --version
 
 Options:
-  -h --help  Show help message
+  -h --help     Show help message
+  -v --version  Show version
 `
 
 	return strings.Trim(message, "\n")
