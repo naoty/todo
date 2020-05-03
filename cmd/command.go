@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"strings"
+
+	"github.com/naoty/todo/repository"
 )
 
 // Command represents an interface for all commands.
@@ -10,7 +12,7 @@ type Command interface {
 }
 
 // CommandFactory represents a factory function for a command.
-type CommandFactory func(cli CLI, config Config) Command
+type CommandFactory func(cli CLI, config Config, repo repository.Repository) Command
 
 var commandFactories = map[string]CommandFactory{
 	"list": NewList,

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/naoty/todo/repository"
 	"github.com/naoty/todo/todo"
 )
 
@@ -10,11 +11,12 @@ import (
 type List struct {
 	cli    CLI
 	config Config
+	repo   repository.Repository
 }
 
 // NewList returns a new List.
-func NewList(cli CLI, config Config) Command {
-	return &List{cli: cli, config: config}
+func NewList(cli CLI, config Config, repo repository.Repository) Command {
+	return &List{cli: cli, config: config, repo: repo}
 }
 
 // Run implements Command interface.

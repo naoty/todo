@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/naoty/todo/repository"
 	"github.com/spf13/pflag"
 )
 
@@ -13,7 +14,7 @@ type Root struct {
 }
 
 // NewRoot returns a *Root.
-func NewRoot(cli CLI, config Config) Command {
+func NewRoot(cli CLI, config Config, repo repository.Repository) Command {
 	return &Root{cli: cli, config: config}
 }
 

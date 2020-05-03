@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/naoty/todo/cmd"
+	"github.com/naoty/todo/repository"
 )
 
 // Version is the version of this application.
@@ -23,7 +24,8 @@ func main() {
 		TodosPath: ensureTodosPath(),
 		Version:   Version,
 	}
-	command := commandFactory(stdio, config)
+	repo := repository.NewFS(ensureTodosPath())
+	command := commandFactory(stdio, config, repo)
 	status := command.Run(os.Args)
 	os.Exit(status)
 }
