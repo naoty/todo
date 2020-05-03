@@ -16,3 +16,8 @@ func New(id int, title string) *Todo {
 func (td *Todo) String() string {
 	return fmt.Sprintf("[ ] %03d: %s", td.id, td.title)
 }
+
+// SetID is setter for id field.
+func (td *Todo) SetID(id int) {
+	td.id = id
+}

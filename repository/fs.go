@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/naoty/todo/todo"
 )
@@ -32,6 +34,11 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 			return nil
 		}
 
+		id, err := parseID(path)
+		if err != nil {
+			return err
+		}
+
 		file, err := os.Open(path)
 		if err != nil {
 			return err
@@ -48,6 +55,7 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 			return err
 		}
 
+		td.SetID(id)
 		todos = append(todos, td)
 
 		return nil
@@ -58,4 +66,9 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func parseID(path string) (int, error) {
+	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
+	return strconv.Atoi(text)
 }
