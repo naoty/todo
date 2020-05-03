@@ -34,5 +34,6 @@ func (c *Root) Run(args []string) int {
 		return 0
 	}
 
-	return 0
+	fmt.Fprintln(c.ErrorWriter, usage())
+	return 1
 }
