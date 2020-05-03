@@ -21,18 +21,28 @@ type CLI struct {
 // CommandFactory represents a factory function for a command.
 type CommandFactory func(cli CLI) Command
 
+var commandFactories = map[string]CommandFactory{
+	"list": NewList,
+}
+
 // Lookup returns a CommandFactory based on args.
 func Lookup(args []string) CommandFactory {
 	if len(args) < 2 {
 		return NewRoot
 	}
 
-	return NewRoot
+	factory, ok := commandFactories[args[1]]
+	if !ok {
+		return NewRoot
+	}
+
+	return factory
 }
 
 func usage() string {
 	message := `
 Usage:
+  todo list
   todo -h | --help
   todo -v | --version
 
