@@ -17,6 +17,11 @@ func (td *Todo) String() string {
 	return fmt.Sprintf("[ ] %03d: %s", td.id, td.title)
 }
 
+// ID returns the id of Todo.
+func (td *Todo) ID() int {
+	return td.id
+}
+
 // SetID is setter for id field.
 func (td *Todo) SetID(id int) {
 	td.id = id

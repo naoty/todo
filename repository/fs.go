@@ -68,7 +68,55 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 	return todos, nil
 }
 
+// Add implements Repository interface.
+func (repo *FS) Add(title string) error {
+	todos, err := repo.List()
+	if err != nil {
+		return fmt.Errorf("failed to get next id: %w", err)
+	}
+
+	lastID := 0
+	for _, td := range todos {
+		id := td.ID()
+		if id > lastID {
+			lastID = id
+		}
+	}
+
+	nextID := lastID + 1
+	filename := fmt.Sprintf("%d.md", nextID)
+	path := filepath.Join(repo.root, filename)
+
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("already exist: %s", path)
+	}
+
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+	defer file.Close()
+
+	content := newContent(title)
+	_, err = file.WriteString(content)
+	if err != nil {
+		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
+	return nil
+}
+
 func parseID(path string) (int, error) {
 	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
 	return strconv.Atoi(text)
+}
+
+func newContent(title string) string {
+	return strings.TrimLeft(fmt.Sprintf(`
+---
+title: %s
+---
+
+
+`, title), "\n")
 }
