@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"io"
 	"strings"
 
 	"github.com/naoty/todo/repository"
@@ -9,6 +10,18 @@ import (
 // Command represents an interface for all commands.
 type Command interface {
 	Run(args []string) int
+}
+
+// CLI represents an I/O against CLI.
+type CLI struct {
+	Reader      io.Reader
+	Writer      io.Writer
+	ErrorWriter io.Writer
+}
+
+// Metadata represents metadata of this application.
+type Metadata struct {
+	Version string
 }
 
 // CommandFactory represents a factory function for a command.
