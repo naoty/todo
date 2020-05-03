@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/naoty/todo/repository"
-	"github.com/naoty/todo/todo"
 )
 
 // List represents `list` subcommand.
@@ -20,9 +19,10 @@ func NewList(cli CLI, meta Metadata, repo repository.Repository) Command {
 
 // Run implements Command interface.
 func (c *List) Run(args []string) int {
-	todos := []*todo.Todo{
-		todo.New(1, "dummy"),
-		todo.New(2, "dummy"),
+	todos, err := c.repo.List()
+	if err != nil {
+		fmt.Fprintln(c.cli.ErrorWriter, err)
+		return 1
 	}
 
 	for _, td := range todos {
