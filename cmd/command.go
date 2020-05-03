@@ -12,7 +12,7 @@ type Command interface {
 }
 
 // CommandFactory represents a factory function for a command.
-type CommandFactory func(cli CLI, config Config, repo repository.Repository) Command
+type CommandFactory func(cli CLI, meta Metadata, repo repository.Repository) Command
 
 var commandFactories = map[string]CommandFactory{
 	"list": NewList,

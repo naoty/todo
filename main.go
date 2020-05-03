@@ -20,12 +20,11 @@ func main() {
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stderr,
 	}
-	config := cmd.Config{
-		TodosPath: ensureTodosPath(),
-		Version:   Version,
+	meta := cmd.Metadata{
+		Version: Version,
 	}
 	repo := repository.NewFS(ensureTodosPath())
-	command := commandFactory(stdio, config, repo)
+	command := commandFactory(stdio, meta, repo)
 	status := command.Run(os.Args)
 	os.Exit(status)
 }

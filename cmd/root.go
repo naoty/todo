@@ -9,13 +9,13 @@ import (
 
 // Root represents a command run when no subcommand is passed.
 type Root struct {
-	cli    CLI
-	config Config
+	cli  CLI
+	meta Metadata
 }
 
 // NewRoot returns a *Root.
-func NewRoot(cli CLI, config Config, repo repository.Repository) Command {
-	return &Root{cli: cli, config: config}
+func NewRoot(cli CLI, meta Metadata, repo repository.Repository) Command {
+	return &Root{cli: cli, meta: meta}
 }
 
 // Run implements Command interface.
@@ -32,7 +32,7 @@ func (c *Root) Run(args []string) int {
 	}
 
 	if *version {
-		fmt.Fprintln(c.cli.Writer, c.config.Version)
+		fmt.Fprintln(c.cli.Writer, c.meta.Version)
 		return 0
 	}
 

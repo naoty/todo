@@ -9,14 +9,13 @@ import (
 
 // List represents `list` subcommand.
 type List struct {
-	cli    CLI
-	config Config
-	repo   repository.Repository
+	cli  CLI
+	repo repository.Repository
 }
 
 // NewList returns a new List.
-func NewList(cli CLI, config Config, repo repository.Repository) Command {
-	return &List{cli: cli, config: config, repo: repo}
+func NewList(cli CLI, meta Metadata, repo repository.Repository) Command {
+	return &List{cli: cli, repo: repo}
 }
 
 // Run implements Command interface.
