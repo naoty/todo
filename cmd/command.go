@@ -1,6 +1,9 @@
 package cmd
 
-import "io"
+import (
+	"io"
+	"strings"
+)
 
 // Command represents an interface for all commands.
 type Command interface {
@@ -24,4 +27,16 @@ func Lookup(args []string) CommandFactory {
 	}
 
 	return NewRoot
+}
+
+func usage() string {
+	message := `
+Usage:
+  todo -h | --help
+
+Options:
+  -h --help  Show help message
+`
+
+	return strings.Trim(message, "\n")
 }

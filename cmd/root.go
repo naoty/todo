@@ -1,6 +1,10 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/spf13/pflag"
+)
 
 // Root represents a command run when no subcommand is passed.
 type Root struct {
@@ -14,6 +18,15 @@ func NewRoot(cli CLI) Command {
 
 // Run implements Command interface.
 func (c *Root) Run(args []string) int {
-	fmt.Fprintln(c.Writer, "TODO: implement root")
+	flagset := pflag.NewFlagSet("", pflag.ExitOnError)
+	help := flagset.BoolP("help", "h", false, "")
+
+	flagset.Parse(args)
+
+	if *help {
+		fmt.Fprintln(c.Writer, usage())
+		return 0
+	}
+
 	return 0
 }
