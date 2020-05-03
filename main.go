@@ -12,12 +12,15 @@ var Version = "0.0.0"
 
 func main() {
 	commandFactory := cmd.Lookup(os.Args)
-	command := commandFactory(cmd.CLI{
-		Version:     Version,
+	stdio := cmd.CLI{
 		Reader:      os.Stdin,
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stderr,
-	})
+	}
+	config := cmd.Config{
+		Version: Version,
+	}
+	command := commandFactory(stdio, config)
 	status := command.Run(os.Args)
 	os.Exit(status)
 }

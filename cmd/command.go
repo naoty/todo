@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"io"
 	"strings"
 )
 
@@ -10,16 +9,8 @@ type Command interface {
 	Run(args []string) int
 }
 
-// CLI represents an I/O against CLI.
-type CLI struct {
-	Version     string
-	Reader      io.Reader
-	Writer      io.Writer
-	ErrorWriter io.Writer
-}
-
 // CommandFactory represents a factory function for a command.
-type CommandFactory func(cli CLI) Command
+type CommandFactory func(cli CLI, config Config) Command
 
 var commandFactories = map[string]CommandFactory{
 	"list": NewList,
