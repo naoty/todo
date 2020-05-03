@@ -1,6 +1,10 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/naoty/todo/todo"
+)
 
 // List represents `list` subcommand.
 type List struct {
@@ -15,6 +19,14 @@ func NewList(cli CLI, config Config) Command {
 
 // Run implements Command interface.
 func (c *List) Run(args []string) int {
-	fmt.Fprintln(c.cli.Writer, "TODO: implement list")
+	todos := []*todo.Todo{
+		todo.New(1, "dummy"),
+		todo.New(2, "dummy"),
+	}
+
+	for _, td := range todos {
+		fmt.Fprintln(c.cli.Writer, td)
+	}
+
 	return 0
 }
