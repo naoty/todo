@@ -28,6 +28,7 @@ type Metadata struct {
 type CommandFactory func(cli CLI, meta Metadata, repo repository.Repository) Command
 
 var commandFactories = map[string]CommandFactory{
+	"add":  NewAdd,
 	"list": NewList,
 }
 
@@ -48,6 +49,7 @@ func Lookup(args []string) CommandFactory {
 func usage() string {
 	message := `
 Usage:
+  todo add <title>
   todo list
   todo -h | --help
   todo -v | --version
