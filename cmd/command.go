@@ -30,6 +30,7 @@ type CommandFactory func(cli CLI, meta Metadata, repo repository.Repository) Com
 var commandFactories = map[string]CommandFactory{
 	"add":  NewAdd,
 	"list": NewList,
+	"open": NewOpen,
 }
 
 // Lookup returns a CommandFactory based on args.
@@ -51,6 +52,7 @@ func usage() string {
 Usage:
   todo add <title>
   todo list
+  todo open <id>
   todo -h | --help
   todo -v | --version
 
