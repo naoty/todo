@@ -18,7 +18,7 @@ type FileSystem struct {
 	root string
 }
 
-type metadata struct {
+type index struct {
 	Todos map[string][]int `json:"todos"`
 }
 
@@ -88,7 +88,7 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
 
-	st, err := repo.readMetadata()
+	st, err := repo.readIndex()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
@@ -148,13 +148,13 @@ func (repo *FileSystem) Add(title string) error {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
-	st, err := repo.readMetadata()
+	st, err := repo.readIndex()
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
 	st.Todos[""] = append(st.Todos[""], nextID)
-	err = repo.writeMetadata(st)
+	err = repo.writeIndex(st)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
@@ -184,7 +184,7 @@ func (repo *FileSystem) Move(id, position int) error {
 
 	to := position - 1
 
-	st, err := repo.readMetadata()
+	st, err := repo.readIndex()
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
@@ -203,7 +203,7 @@ func (repo *FileSystem) Move(id, position int) error {
 
 	st.Todos[""] = swapped(ids, from, to)
 
-	err = repo.writeMetadata(st)
+	err = repo.writeIndex(st)
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
@@ -225,10 +225,10 @@ state: undone
 `, title), "\n")
 }
 
-func (repo *FileSystem) readMetadata() (*metadata, error) {
-	path := filepath.Join(repo.root, "metadata.json")
+func (repo *FileSystem) readIndex() (*index, error) {
+	path := filepath.Join(repo.root, "index.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return &metadata{
+		return &index{
 			Todos: map[string][]int{
 				"": {},
 			},
@@ -237,35 +237,35 @@ func (repo *FileSystem) readMetadata() (*metadata, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read index from %s: %w", path, err)
 	}
 	defer file.Close()
 
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read index from %s: %w", path, err)
 	}
 
-	var meta metadata
-	err = json.Unmarshal(content, &meta)
+	var i index
+	err = json.Unmarshal(content, &i)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read index from %s: %w", path, err)
 	}
 
-	return &meta, nil
+	return &i, nil
 }
 
-func (repo *FileSystem) writeMetadata(meta *metadata) error {
-	path := filepath.Join(repo.root, "metadata.json")
+func (repo *FileSystem) writeIndex(i *index) error {
+	path := filepath.Join(repo.root, "index.json")
 
-	data, err := json.MarshalIndent(*meta, "", "  ")
+	data, err := json.MarshalIndent(*i, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to write metadata to %s: %w", path, err)
+		return fmt.Errorf("failed to write index to %s: %w", path, err)
 	}
 
 	err = ioutil.WriteFile(path, data, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write metadata to %s: %w", path, err)
+		return fmt.Errorf("failed to write index to %s: %w", path, err)
 	}
 
 	return nil
