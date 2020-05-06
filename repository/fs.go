@@ -159,6 +159,41 @@ func (repo *FS) Open(id int) error {
 	return nil
 }
 
+// Move implements Repository interface.
+func (repo *FS) Move(id, position int) error {
+	if position < 1 {
+		return fmt.Errorf("position number must be larger than 0: %d", position)
+	}
+
+	to := position - 1
+
+	st, err := repo.readState()
+	if err != nil {
+		return fmt.Errorf("failed to move TODO: %w", err)
+	}
+
+	ids, _ := st.Todos[""]
+	if to >= len(ids) {
+		return fmt.Errorf("position number is too large: %d", position)
+	}
+
+	var from int
+	for j, _id := range ids {
+		if _id == id {
+			from = j
+		}
+	}
+
+	st.Todos[""] = swapped(ids, from, to)
+
+	err = repo.writeState(st)
+	if err != nil {
+		return fmt.Errorf("failed to move TODO: %w", err)
+	}
+
+	return nil
+}
+
 func parseID(path string) (int, error) {
 	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
 	return strconv.Atoi(text)
@@ -216,4 +251,22 @@ func (repo *FS) writeState(st *state) error {
 	}
 
 	return nil
+}
+
+func swapped(s []int, from, to int) []int {
+	if from < 0 || from >= len(s) {
+		return s
+	}
+
+	if to < 0 || to >= len(s) {
+		return s
+	}
+
+	copied := make([]int, len(s), cap(s))
+	copy(copied, s)
+
+	e := copied[from]
+	copied = append(copied[:from], copied[(from+1):]...)
+	copied = append(copied[:to], append([]int{e}, copied[to:]...)...)
+	return copied
 }
