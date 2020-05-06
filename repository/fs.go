@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,6 +18,10 @@ type FS struct {
 	root string
 }
 
+type state struct {
+	Todos map[string][]int `json:"todos"`
+}
+
 // NewFS returns a new FS.
 func NewFS(root string) *FS {
 	return &FS{root: root}
@@ -31,7 +36,7 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 			return err
 		}
 
-		if info.IsDir() {
+		if !strings.HasSuffix(path, ".md") {
 			return nil
 		}
 
@@ -104,6 +109,17 @@ func (repo *FS) Add(title string) error {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
+	st, err := repo.readState()
+	if err != nil {
+		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
+	st.Todos[""] = append(st.Todos[""], nextID)
+	err = repo.writeState(st)
+	if err != nil {
+		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
 	return nil
 }
 
@@ -132,4 +148,50 @@ func newContent(title string) string {
 title: %s
 ---
 `, title), "\n")
+}
+
+func (repo *FS) readState() (*state, error) {
+	path := filepath.Join(repo.root, "state.json")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return &state{
+			Todos: map[string][]int{
+				"": {},
+			},
+		}, nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+	}
+	defer file.Close()
+
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+	}
+
+	var st state
+	err = json.Unmarshal(content, &st)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+	}
+
+	return &st, nil
+}
+
+func (repo *FS) writeState(st *state) error {
+	path := filepath.Join(repo.root, "state.json")
+
+	data, err := json.MarshalIndent(*st, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to write state to %s: %w", path, err)
+	}
+
+	err = ioutil.WriteFile(path, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write state to %s: %w", path, err)
+	}
+
+	return nil
 }
