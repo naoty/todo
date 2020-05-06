@@ -127,11 +127,9 @@ func parseID(path string) (int, error) {
 }
 
 func newContent(title string) string {
-	return strings.TrimLeft(fmt.Sprintf(`
+	return strings.Trim(fmt.Sprintf(`
 ---
 title: %s
 ---
-
-
 `, title), "\n")
 }
