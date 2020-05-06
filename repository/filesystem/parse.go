@@ -1,9 +1,10 @@
-package todo
+package filesystem
 
 import (
 	"errors"
 	"strings"
 
+	"github.com/naoty/todo/todo"
 	"gopkg.in/yaml.v2"
 )
 
@@ -15,7 +16,7 @@ type metadata struct {
 }
 
 // Parse parses given text into a *Todo.
-func Parse(text string) (*Todo, error) {
+func Parse(text string) (*todo.Todo, error) {
 	frontmatter, _, err := splitFrontmatter(text)
 	if err != nil {
 		return nil, err
@@ -27,17 +28,17 @@ func Parse(text string) (*Todo, error) {
 		return nil, err
 	}
 
-	state := Undone
+	state := todo.Undone
 	switch meta.State {
 	case "done":
-		state = Done
+		state = todo.Done
 	case "waiting":
-		state = Waiting
+		state = todo.Waiting
 	case "archived":
-		state = Archived
+		state = todo.Archived
 	}
 
-	return &Todo{id: 0, title: meta.Title, state: state}, nil
+	return &todo.Todo{ID: 0, Title: meta.Title, State: state}, nil
 }
 
 func splitFrontmatter(text string) (string, string, error) {

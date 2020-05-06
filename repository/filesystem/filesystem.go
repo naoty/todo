@@ -73,12 +73,12 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 			return err
 		}
 
-		td, err := todo.Parse(string(content))
+		td, err := Parse(string(content))
 		if err != nil {
 			return err
 		}
 
-		td.SetID(id)
+		td.ID = id
 		todos[id] = td
 
 		return nil
@@ -122,7 +122,7 @@ func (repo *FileSystem) Add(title string) error {
 
 	lastID := 0
 	for _, td := range todos {
-		id := td.ID()
+		id := td.ID
 		if id > lastID {
 			lastID = id
 		}

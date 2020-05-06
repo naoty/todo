@@ -1,10 +1,11 @@
-package todo_test
+package filesystem_test
 
 import (
 	"io/ioutil"
 	"os"
 	"testing"
 
+	"github.com/naoty/todo/repository/filesystem"
 	"github.com/naoty/todo/todo"
 )
 
@@ -29,7 +30,7 @@ func TestParse(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			td, err := todo.Parse(string(content))
+			td, err := filesystem.Parse(string(content))
 			if err != nil {
 				t.Fatal(err)
 			}
