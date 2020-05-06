@@ -18,7 +18,7 @@ type FileSystem struct {
 	root string
 }
 
-type state struct {
+type metadata struct {
 	Todos map[string][]int `json:"todos"`
 }
 
@@ -88,7 +88,7 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
 
-	st, err := repo.readState()
+	st, err := repo.readMetadata()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
@@ -148,13 +148,13 @@ func (repo *FileSystem) Add(title string) error {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
-	st, err := repo.readState()
+	st, err := repo.readMetadata()
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
 	st.Todos[""] = append(st.Todos[""], nextID)
-	err = repo.writeState(st)
+	err = repo.writeMetadata(st)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
@@ -184,7 +184,7 @@ func (repo *FileSystem) Move(id, position int) error {
 
 	to := position - 1
 
-	st, err := repo.readState()
+	st, err := repo.readMetadata()
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
@@ -203,7 +203,7 @@ func (repo *FileSystem) Move(id, position int) error {
 
 	st.Todos[""] = swapped(ids, from, to)
 
-	err = repo.writeState(st)
+	err = repo.writeMetadata(st)
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
@@ -225,10 +225,10 @@ state: undone
 `, title), "\n")
 }
 
-func (repo *FileSystem) readState() (*state, error) {
-	path := filepath.Join(repo.root, "state.json")
+func (repo *FileSystem) readMetadata() (*metadata, error) {
+	path := filepath.Join(repo.root, "metadata.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return &state{
+		return &metadata{
 			Todos: map[string][]int{
 				"": {},
 			},
@@ -237,35 +237,35 @@ func (repo *FileSystem) readState() (*state, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
 	}
 	defer file.Close()
 
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
 	}
 
-	var st state
-	err = json.Unmarshal(content, &st)
+	var meta metadata
+	err = json.Unmarshal(content, &meta)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read state from %s: %w", path, err)
+		return nil, fmt.Errorf("failed to read metadata from %s: %w", path, err)
 	}
 
-	return &st, nil
+	return &meta, nil
 }
 
-func (repo *FileSystem) writeState(st *state) error {
-	path := filepath.Join(repo.root, "state.json")
+func (repo *FileSystem) writeMetadata(meta *metadata) error {
+	path := filepath.Join(repo.root, "metadata.json")
 
-	data, err := json.MarshalIndent(*st, "", "  ")
+	data, err := json.MarshalIndent(*meta, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to write state to %s: %w", path, err)
+		return fmt.Errorf("failed to write metadata to %s: %w", path, err)
 	}
 
 	err = ioutil.WriteFile(path, data, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write state to %s: %w", path, err)
+		return fmt.Errorf("failed to write metadata to %s: %w", path, err)
 	}
 
 	return nil
