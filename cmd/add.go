@@ -14,7 +14,7 @@ type Add struct {
 }
 
 // NewAdd returns a new Add.
-func NewAdd(cli CLI, meta Metadata, repo repository.Repository) Command {
+func NewAdd(cli CLI, version string, repo repository.Repository) Command {
 	return &Add{cli: cli, repo: repo}
 }
 

@@ -14,7 +14,7 @@ type Move struct {
 }
 
 // NewMove returns a new Move.
-func NewMove(cli CLI, meta Metadata, repo repository.Repository) Command {
+func NewMove(cli CLI, version string, repo repository.Repository) Command {
 	return &Move{cli: cli, repo: repo}
 }
 

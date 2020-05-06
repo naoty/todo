@@ -19,13 +19,8 @@ type CLI struct {
 	ErrorWriter io.Writer
 }
 
-// Metadata represents metadata of this application.
-type Metadata struct {
-	Version string
-}
-
 // CommandFactory represents a factory function for a command.
-type CommandFactory func(cli CLI, meta Metadata, repo repository.Repository) Command
+type CommandFactory func(cli CLI, version string, repo repository.Repository) Command
 
 var commandFactories = map[string]CommandFactory{
 	"add":  NewAdd,

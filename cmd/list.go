@@ -13,7 +13,7 @@ type List struct {
 }
 
 // NewList returns a new List.
-func NewList(cli CLI, meta Metadata, repo repository.Repository) Command {
+func NewList(cli CLI, version string, repo repository.Repository) Command {
 	return &List{cli: cli, repo: repo}
 }
 

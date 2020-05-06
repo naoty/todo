@@ -14,7 +14,7 @@ type Open struct {
 }
 
 // NewOpen returns a new Open.
-func NewOpen(cli CLI, meta Metadata, repo repository.Repository) Command {
+func NewOpen(cli CLI, version string, repo repository.Repository) Command {
 	return &Open{cli: cli, repo: repo}
 }
 

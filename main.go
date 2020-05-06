@@ -19,10 +19,6 @@ func main() {
 		ErrorWriter: os.Stderr,
 	}
 
-	meta := cmd.Metadata{
-		Version: Version,
-	}
-
 	repo, err := filesystem.New()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -30,7 +26,7 @@ func main() {
 	}
 
 	commandFactory := cmd.Lookup(os.Args)
-	command := commandFactory(stdio, meta, repo)
+	command := commandFactory(stdio, Version, repo)
 	status := command.Run(os.Args)
 	os.Exit(status)
 }
