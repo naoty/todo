@@ -1,4 +1,4 @@
-package repository
+package filesystem
 
 import (
 	"encoding/json"
@@ -13,8 +13,8 @@ import (
 	"github.com/naoty/todo/todo"
 )
 
-// FS represents a repository backed by file system.
-type FS struct {
+// FileSystem represents a repository backed by file system.
+type FileSystem struct {
 	root string
 }
 
@@ -22,13 +22,13 @@ type state struct {
 	Todos map[string][]int `json:"todos"`
 }
 
-// NewFS returns a new FS.
-func NewFS(root string) *FS {
-	return &FS{root: root}
+// New returns a new FileSystem.
+func New(root string) *FileSystem {
+	return &FileSystem{root: root}
 }
 
 // List implements Repository interface.
-func (repo *FS) List() ([]*todo.Todo, error) {
+func (repo *FileSystem) List() ([]*todo.Todo, error) {
 	todos := map[int]*todo.Todo{}
 
 	err := filepath.Walk(repo.root, func(path string, info os.FileInfo, err error) error {
@@ -97,7 +97,7 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 }
 
 // Add implements Repository interface.
-func (repo *FS) Add(title string) error {
+func (repo *FileSystem) Add(title string) error {
 	todos, err := repo.List()
 	if err != nil {
 		return fmt.Errorf("failed to get next id: %w", err)
@@ -146,7 +146,7 @@ func (repo *FS) Add(title string) error {
 }
 
 // Open implements Repository interface.
-func (repo *FS) Open(id int) error {
+func (repo *FileSystem) Open(id int) error {
 	filename := fmt.Sprintf("%d.md", id)
 	path := filepath.Join(repo.root, filename)
 
@@ -160,7 +160,7 @@ func (repo *FS) Open(id int) error {
 }
 
 // Move implements Repository interface.
-func (repo *FS) Move(id, position int) error {
+func (repo *FileSystem) Move(id, position int) error {
 	if position < 1 {
 		return fmt.Errorf("position number must be larger than 0: %d", position)
 	}
@@ -208,7 +208,7 @@ state: undone
 `, title), "\n")
 }
 
-func (repo *FS) readState() (*state, error) {
+func (repo *FileSystem) readState() (*state, error) {
 	path := filepath.Join(repo.root, "state.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return &state{
@@ -238,7 +238,7 @@ func (repo *FS) readState() (*state, error) {
 	return &st, nil
 }
 
-func (repo *FS) writeState(st *state) error {
+func (repo *FileSystem) writeState(st *state) error {
 	path := filepath.Join(repo.root, "state.json")
 
 	data, err := json.MarshalIndent(*st, "", "  ")
