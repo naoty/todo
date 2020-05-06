@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/naoty/todo/repository"
+	"github.com/naoty/todo/todo"
 )
 
 // List represents `list` subcommand.
@@ -26,7 +27,19 @@ func (c *List) Run(args []string) int {
 	}
 
 	for _, td := range todos {
-		fmt.Fprintln(c.cli.Writer, td)
+		var mark string
+		switch td.State {
+		case todo.Undone:
+			mark = "[ ]"
+		case todo.Done:
+			mark = "[x]"
+		case todo.Waiting:
+			mark = "[w]"
+		case todo.Archived:
+			mark = "[-]"
+		}
+
+		fmt.Fprintf(c.cli.Writer, "%s %03d: %s\n", mark, td.ID, td.Title)
 	}
 
 	return 0
