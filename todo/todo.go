@@ -23,8 +23,3 @@ const (
 	// Archived represents state of archived TODO.
 	Archived
 )
-
-// New returns a new Todo.
-func New(id int, title string) *Todo {
-	return &Todo{ID: id, Title: title, State: Undone}
-}

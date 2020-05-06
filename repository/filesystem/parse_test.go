@@ -14,7 +14,7 @@ func TestParse(t *testing.T) {
 		path string
 		td   *todo.Todo
 	}{
-		{"testdata/1.md", todo.New(0, "dummy")},
+		{"testdata/1.md", &todo.Todo{ID: 0, Title: "dummy"}},
 	}
 
 	for _, testcase := range testcases {
