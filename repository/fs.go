@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -101,6 +102,20 @@ func (repo *FS) Add(title string) error {
 	_, err = file.WriteString(content)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
+	return nil
+}
+
+// Open implements Repository interface.
+func (repo *FS) Open(id int) error {
+	filename := fmt.Sprintf("%d.md", id)
+	path := filepath.Join(repo.root, filename)
+
+	cmd := exec.Command("open", path)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to open %s: %w", path, err)
 	}
 
 	return nil
