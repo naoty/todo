@@ -11,6 +11,7 @@ const separator = "---"
 
 type metadata struct {
 	Title string
+	State string
 }
 
 // Parse parses given text into a *Todo.
@@ -26,7 +27,17 @@ func Parse(text string) (*Todo, error) {
 		return nil, err
 	}
 
-	return &Todo{id: 0, title: meta.Title}, nil
+	state := Undone
+	switch meta.State {
+	case "done":
+		state = Done
+	case "waiting":
+		state = Waiting
+	case "archived":
+		state = Archived
+	}
+
+	return &Todo{id: 0, title: meta.Title, state: state}, nil
 }
 
 func splitFrontmatter(text string) (string, string, error) {

@@ -203,6 +203,7 @@ func newContent(title string) string {
 	return strings.Trim(fmt.Sprintf(`
 ---
 title: %s
+state: undone
 ---
 `, title), "\n")
 }
