@@ -23,8 +23,25 @@ type state struct {
 }
 
 // New returns a new FileSystem.
-func New(root string) *FileSystem {
-	return &FileSystem{root: root}
+func New() (*FileSystem, error) {
+	home := os.Getenv("TODOS_PATH")
+	if home == "" {
+		var err error
+		home, err = os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	root := filepath.Join(home, ".todos")
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		err := os.Mkdir(root, 0755)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &FileSystem{root: root}, nil
 }
 
 // List implements Repository interface.
