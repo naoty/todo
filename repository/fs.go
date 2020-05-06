@@ -29,7 +29,7 @@ func NewFS(root string) *FS {
 
 // List implements Repository interface.
 func (repo *FS) List() ([]*todo.Todo, error) {
-	todos := []*todo.Todo{}
+	todos := map[int]*todo.Todo{}
 
 	err := filepath.Walk(repo.root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -62,16 +62,38 @@ func (repo *FS) List() ([]*todo.Todo, error) {
 		}
 
 		td.SetID(id)
-		todos = append(todos, td)
+		todos[id] = td
 
 		return nil
 	})
 
 	if err != nil {
-		return todos, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
+		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
 
-	return todos, nil
+	st, err := repo.readState()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
+	}
+
+	var ordered []*todo.Todo
+	for k, ids := range st.Todos {
+		// NOTE: when TODOs have subTODOs, k is parent TODO's ID.
+		if k != "" {
+			continue
+		}
+
+		for _, id := range ids {
+			td, ok := todos[id]
+			if !ok {
+				continue
+			}
+
+			ordered = append(ordered, td)
+		}
+	}
+
+	return ordered, nil
 }
 
 // Add implements Repository interface.
