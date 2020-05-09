@@ -27,6 +27,7 @@ var commandFactories = map[string]CommandFactory{
 	"list": NewList,
 	"open": NewOpen,
 	"move": NewMove,
+	"done": NewDone,
 }
 
 // Lookup returns a CommandFactory based on args.
@@ -49,7 +50,8 @@ Usage:
   todo add <title>
   todo list
   todo open <id>
-  todo move <id> <position>
+	todo move <id> <position>
+	todo done <id>
   todo -h | --help
   todo -v | --version
 

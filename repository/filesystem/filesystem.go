@@ -44,6 +44,35 @@ func New() (*FileSystem, error) {
 	return &FileSystem{root: root}, nil
 }
 
+// Get implements Repository interface.
+func (repo *FileSystem) Get(id int) (*todo.Todo, error) {
+	filename := fmt.Sprintf("%d.md", id)
+	path := filepath.Join(repo.root, filename)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, fmt.Errorf("TODO not found: %d", id)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get TODO: %w", err)
+	}
+	defer file.Close()
+
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get TODO: %w", err)
+	}
+
+	td, err := Parse(string(content))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get TODO: %w", err)
+	}
+
+	td.ID = id
+	return td, nil
+}
+
 // List implements Repository interface.
 func (repo *FileSystem) List() ([]*todo.Todo, error) {
 	todos := map[int]*todo.Todo{}
@@ -157,6 +186,30 @@ func (repo *FileSystem) Add(title string) error {
 	err = repo.writeIndex(st)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
+	return nil
+}
+
+// Update implements Repository interface.
+func (repo *FileSystem) Update(td *todo.Todo) error {
+	filename := fmt.Sprintf("%d.md", td.ID)
+	path := filepath.Join(repo.root, filename)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("file not found: %s", path)
+	}
+
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to update TODO: %w", err)
+	}
+	defer file.Close()
+
+	data := Marshal(td)
+	_, err = file.Write(data)
+	if err != nil {
+		return fmt.Errorf("failed to update TODO: %w", err)
 	}
 
 	return nil
