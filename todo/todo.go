@@ -1,5 +1,7 @@
 package todo
 
+import "fmt"
+
 // Todo represents a TODO.
 type Todo struct {
 	ID    int
@@ -8,18 +10,22 @@ type Todo struct {
 }
 
 // State represents the state of TODO.
-type State int
+type State string
 
 const (
 	// Undone represents state of undone TODO.
-	Undone State = iota
+	Undone State = "UNDONE"
 
 	// Done represents state of done TODO.
-	Done
+	Done State = "DONE"
 
 	// Waiting represents state of TODO which I'm waiting for someone to finish.
-	Waiting
+	Waiting State = "WAITING"
 
 	// Archived represents state of archived TODO.
-	Archived
+	Archived State = "ARCHIVED"
 )
+
+func (td *Todo) String() string {
+	return fmt.Sprintf("%#v", td)
+}
