@@ -36,7 +36,7 @@ func (c *List) Run(args []string) int {
 		case todo.Waiting:
 			mark = "[w]"
 		case todo.Archived:
-			mark = "[-]"
+			continue
 		}
 
 		fmt.Fprintf(c.cli.Writer, "%s %03d: %s\n", mark, td.ID, td.Title)
