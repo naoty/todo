@@ -51,7 +51,7 @@ func usage() string {
 	message := `
 Usage:
   todo list
-  todo add <title>
+  todo add (-p | --parent <id>) <title>
   todo delete <id>
   todo move <id> <position>
   todo open <id>

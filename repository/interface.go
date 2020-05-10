@@ -6,7 +6,7 @@ import "github.com/naoty/todo/todo"
 type Repository interface {
 	Get(id int) (*todo.Todo, error)
 	List() ([]*todo.Todo, error)
-	Add(title string) error
+	Add(title string, parent *int) error
 	Update(td *todo.Todo) error
 	Delete(id int) error
 	Open(id int) error

@@ -143,7 +143,7 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 }
 
 // Add implements Repository interface.
-func (repo *FileSystem) Add(title string) error {
+func (repo *FileSystem) Add(title string, parent *int) error {
 	todos, err := repo.List()
 	if err != nil {
 		return fmt.Errorf("failed to get next id: %w", err)
