@@ -17,7 +17,7 @@ type metadata struct {
 
 // Parse parses given text into a *Todo.
 func Parse(text string) (*todo.Todo, error) {
-	frontmatter, _, err := splitFrontmatter(text)
+	frontmatter, body, err := splitFrontmatter(text)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func Parse(text string) (*todo.Todo, error) {
 		state = todo.Archived
 	}
 
-	return &todo.Todo{ID: 0, Title: meta.Title, State: state}, nil
+	return &todo.Todo{ID: 0, Title: meta.Title, State: state, Body: body}, nil
 }
 
 func splitFrontmatter(text string) (string, string, error) {

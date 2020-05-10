@@ -25,6 +25,7 @@ func Marshal(td *todo.Todo) []byte {
 	}
 
 	lines = append(lines, "---")
+	lines = append(lines, td.Body)
 	text := strings.Join(lines, "\n")
 
 	return []byte(text)

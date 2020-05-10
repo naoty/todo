@@ -7,6 +7,7 @@ type Todo struct {
 	ID    int
 	Title string
 	State State
+	Body  string
 }
 
 // State represents the state of TODO.
