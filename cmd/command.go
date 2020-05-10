@@ -23,10 +23,11 @@ type CLI struct {
 type CommandFactory func(cli CLI, version string, repo repository.Repository) Command
 
 var commandFactories = map[string]CommandFactory{
-	"add":     NewAdd,
 	"list":    NewList,
-	"open":    NewOpen,
+	"add":     NewAdd,
+	"delete":  NewDelete,
 	"move":    NewMove,
+	"open":    NewOpen,
 	"done":    NewDone,
 	"wait":    NewWait,
 	"archive": NewArchive,
@@ -49,10 +50,11 @@ func Lookup(args []string) CommandFactory {
 func usage() string {
 	message := `
 Usage:
-  todo add <title>
   todo list
-  todo open <id>
+  todo add <title>
+  todo delete <id>
   todo move <id> <position>
+  todo open <id>
   todo done <id>
   todo wait <id>
   todo archive <id>

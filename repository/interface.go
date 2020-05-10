@@ -8,6 +8,7 @@ type Repository interface {
 	List() ([]*todo.Todo, error)
 	Add(title string) error
 	Update(td *todo.Todo) error
+	Delete(id int) error
 	Open(id int) error
 	Move(id, position int) error
 }

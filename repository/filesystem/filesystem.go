@@ -215,6 +215,48 @@ func (repo *FileSystem) Update(td *todo.Todo) error {
 	return nil
 }
 
+// Delete implements Repository interface.
+func (repo *FileSystem) Delete(id int) error {
+	filename := fmt.Sprintf("%d.md", id)
+	path := filepath.Join(repo.root, filename)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("file not found: %s", path)
+	}
+
+	err := os.Remove(path)
+	if err != nil {
+		return fmt.Errorf("failed to delete TODO: %w", err)
+	}
+
+	index, err := repo.readIndex()
+	if err != nil {
+		return fmt.Errorf("failed to delete TODO from index: %w", err)
+	}
+
+	for k, todos := range index.Todos {
+		if k != "" {
+			continue
+		}
+
+		var ids []int
+		for _, _id := range todos {
+			if _id == id {
+				continue
+			}
+			ids = append(ids, _id)
+		}
+		index.Todos[k] = ids
+	}
+
+	err = repo.writeIndex(index)
+	if err != nil {
+		return fmt.Errorf("failed to delete TODO from index: %w", err)
+	}
+
+	return nil
+}
+
 // Open implements Repository interface.
 func (repo *FileSystem) Open(id int) error {
 	filename := fmt.Sprintf("%d.md", id)
