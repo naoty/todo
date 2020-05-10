@@ -8,6 +8,7 @@ type Todo struct {
 	Title string
 	State State
 	Body  string
+	Todos []*Todo
 }
 
 // State represents the state of TODO.

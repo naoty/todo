@@ -35,7 +35,7 @@ func TestParse(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if *td != *testcase.td {
+			if td.ID != testcase.td.ID {
 				t.Errorf("got: %+v, want: %+v", *td, *testcase.td)
 			}
 		})
