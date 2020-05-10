@@ -182,7 +182,12 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
-	st.Todos[""] = append(st.Todos[""], nextID)
+	parentID := ""
+	if *parent > 0 {
+		parentID = fmt.Sprintf("%d", *parent)
+	}
+
+	st.Todos[parentID] = append(st.Todos[parentID], nextID)
 	err = repo.writeIndex(st)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
