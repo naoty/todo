@@ -239,11 +239,28 @@ func (repo *FileSystem) Delete(id int) error {
 		return fmt.Errorf("failed to delete TODO from index: %w", err)
 	}
 
-	for k, todos := range index.Todos {
-		if k != "" {
-			continue
-		}
+	key := fmt.Sprintf("%d", id)
+	subIDs, ok := index.Todos[key]
 
+	if ok {
+		for _, id := range subIDs {
+			filename := fmt.Sprintf("%d.md", id)
+			path := filepath.Join(repo.root, filename)
+
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				return fmt.Errorf("file not found: %s", path)
+			}
+
+			err := os.Remove(path)
+			if err != nil {
+				return fmt.Errorf("failed to delete TODO: %w", err)
+			}
+		}
+	}
+
+	delete(index.Todos, key)
+
+	for k, todos := range index.Todos {
 		var ids []int
 		for _, _id := range todos {
 			if _id == id {
@@ -251,6 +268,12 @@ func (repo *FileSystem) Delete(id int) error {
 			}
 			ids = append(ids, _id)
 		}
+
+		if len(ids) == 0 {
+			delete(index.Todos, k)
+			continue
+		}
+
 		index.Todos[k] = ids
 	}
 
