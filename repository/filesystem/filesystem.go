@@ -134,6 +134,10 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 		return fmt.Errorf("failed to get next id: %w", err)
 	}
 
+	if *parent > 0 && !isExists(todos, *parent) {
+		return fmt.Errorf("parent not found: %d", *parent)
+	}
+
 	nextID := maxID(todos) + 1
 	filename := fmt.Sprintf("%d.md", nextID)
 	path := filepath.Join(repo.root, filename)
@@ -421,4 +425,14 @@ func orderTodos(todos map[int]*todo.Todo, i *index, key string) []*todo.Todo {
 	}
 
 	return result
+}
+
+func isExists(todos []*todo.Todo, id int) bool {
+	for _, td := range todos {
+		if td.ID == id {
+			return true
+		}
+	}
+
+	return false
 }
