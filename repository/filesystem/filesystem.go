@@ -117,27 +117,12 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
 
-	st, err := repo.readIndex()
+	i, err := repo.readIndex()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get todos from %s: %w", repo.root, err)
 	}
 
-	var ordered []*todo.Todo
-	for k, ids := range st.Todos {
-		// NOTE: when TODOs have subTODOs, k is parent TODO's ID.
-		if k != "" {
-			continue
-		}
-
-		for _, id := range ids {
-			td, ok := todos[id]
-			if !ok {
-				continue
-			}
-
-			ordered = append(ordered, td)
-		}
-	}
+	ordered := orderTodos(todos, i, "")
 
 	return ordered, nil
 }
@@ -149,15 +134,7 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 		return fmt.Errorf("failed to get next id: %w", err)
 	}
 
-	lastID := 0
-	for _, td := range todos {
-		id := td.ID
-		if id > lastID {
-			lastID = id
-		}
-	}
-
-	nextID := lastID + 1
+	nextID := maxID(todos) + 1
 	filename := fmt.Sprintf("%d.md", nextID)
 	path := filepath.Join(repo.root, filename)
 
@@ -410,4 +387,38 @@ func swapped(s []int, from, to int) []int {
 	copied = append(copied[:from], copied[(from+1):]...)
 	copied = append(copied[:to], append([]int{e}, copied[to:]...)...)
 	return copied
+}
+
+func maxID(todos []*todo.Todo) int {
+	result := 0
+
+	for _, td := range todos {
+		if td.ID > result {
+			result = td.ID
+		}
+
+		maxSubID := maxID(td.Todos)
+		if maxSubID > result {
+			result = maxSubID
+		}
+	}
+
+	return result
+}
+
+func orderTodos(todos map[int]*todo.Todo, i *index, key string) []*todo.Todo {
+	var result []*todo.Todo
+
+	for _, id := range i.Todos[key] {
+		td, ok := todos[id]
+		if !ok {
+			continue
+		}
+
+		newKey := fmt.Sprintf("%d", td.ID)
+		td.Todos = orderTodos(todos, i, newKey)
+		result = append(result, td)
+	}
+
+	return result
 }

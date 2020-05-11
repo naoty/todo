@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/naoty/todo/repository"
 	"github.com/naoty/todo/todo"
@@ -27,20 +28,29 @@ func (c *List) Run(args []string) int {
 	}
 
 	for _, td := range todos {
-		var mark string
-		switch td.State {
-		case todo.Undone:
-			mark = "[ ]"
-		case todo.Done:
-			mark = "[x]"
-		case todo.Waiting:
-			mark = "[w]"
-		case todo.Archived:
-			continue
-		}
-
-		fmt.Fprintf(c.cli.Writer, "%s %03d: %s\n", mark, td.ID, td.Title)
+		c.printTodos(td, 0)
 	}
 
 	return 0
+}
+
+func (c *List) printTodos(td *todo.Todo, level int) {
+	var mark string
+	switch td.State {
+	case todo.Undone:
+		mark = "[ ]"
+	case todo.Done:
+		mark = "[x]"
+	case todo.Waiting:
+		mark = "[w]"
+	case todo.Archived:
+		return
+	}
+
+	indent := strings.Repeat(" ", level*2)
+	fmt.Fprintf(c.cli.Writer, "%s%s %03d: %s\n", indent, mark, td.ID, td.Title)
+
+	for _, sub := range td.Todos {
+		c.printTodos(sub, level+1)
+	}
 }
