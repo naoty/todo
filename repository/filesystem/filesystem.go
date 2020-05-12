@@ -432,6 +432,11 @@ func isExists(todos []*todo.Todo, id int) bool {
 		if td.ID == id {
 			return true
 		}
+
+		result := isExists(td.Todos, id)
+		if result {
+			return true
+		}
 	}
 
 	return false
