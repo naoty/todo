@@ -29,6 +29,7 @@ var commandFactories = map[string]CommandFactory{
 	"move":    NewMove,
 	"open":    NewOpen,
 	"done":    NewDone,
+	"undone":  NewUndone,
 	"wait":    NewWait,
 	"archive": NewArchive,
 }
@@ -56,6 +57,7 @@ Usage:
   todo move <id> <position>
   todo open <id>
   todo done <id>
+  todo undone <id>
   todo wait <id>
   todo archive <id>
   todo -h | --help
