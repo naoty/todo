@@ -28,20 +28,20 @@ func (c *Wait) Run(args []string) int {
 
 	id, err := strconv.Atoi(args[2])
 	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, usage())
+		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
 	}
 
 	td, err := c.repo.Get(id)
 	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, usage())
+		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
 	}
 
 	td.State = todo.Waiting
 	err = c.repo.Update(td)
 	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, usage())
+		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
 	}
 
