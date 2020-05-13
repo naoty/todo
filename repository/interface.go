@@ -10,5 +10,5 @@ type Repository interface {
 	Update(td *todo.Todo) error
 	Delete(id int) error
 	Open(id int) error
-	Move(id, position int) error
+	Move(id int, parent *int, position int) error
 }

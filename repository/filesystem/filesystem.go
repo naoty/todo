@@ -281,7 +281,7 @@ func (repo *FileSystem) Open(id int) error {
 }
 
 // Move implements Repository interface.
-func (repo *FileSystem) Move(id, position int) error {
+func (repo *FileSystem) Move(id int, parent *int, position int) error {
 	if position < 1 {
 		return fmt.Errorf("position number must be larger than 0: %d", position)
 	}

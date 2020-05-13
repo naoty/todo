@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/naoty/todo/repository"
+	"github.com/spf13/pflag"
 )
 
 // Move represents `move` subcommand.
@@ -20,18 +21,22 @@ func NewMove(cli CLI, version string, repo repository.Repository) Command {
 
 // Run implements Command interface.
 func (c *Move) Run(args []string) int {
-	if len(args) < 4 {
+	flagset := pflag.NewFlagSet("move", pflag.ExitOnError)
+	parent := flagset.IntP("parent", "p", 0, "")
+	flagset.Parse(args)
+
+	if flagset.NArg() < 4 {
 		fmt.Fprintln(c.cli.ErrorWriter, usage())
 		return 1
 	}
 
-	id, err := strconv.Atoi(args[2])
+	id, err := strconv.Atoi(flagset.Args()[2])
 	if err != nil {
 		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
 	}
 
-	position, err := strconv.Atoi(args[3])
+	position, err := strconv.Atoi(flagset.Args()[3])
 	if err != nil {
 		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
@@ -42,7 +47,7 @@ func (c *Move) Run(args []string) int {
 		return 1
 	}
 
-	err = c.repo.Move(id, position)
+	err = c.repo.Move(id, parent, position)
 	if err != nil {
 		fmt.Fprintln(c.cli.ErrorWriter, err)
 		return 1
