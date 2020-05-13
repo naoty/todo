@@ -25,16 +25,18 @@ func (c *Delete) Run(args []string) int {
 		return 1
 	}
 
-	id, err := strconv.Atoi(args[2])
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, usage())
-		return 1
-	}
+	for _, arg := range args {
+		id, err := strconv.Atoi(arg)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, usage())
+			return 1
+		}
 
-	err = c.repo.Delete(id)
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, usage())
-		return 1
+		err = c.repo.Delete(id)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, usage())
+			return 1
+		}
 	}
 
 	return 0

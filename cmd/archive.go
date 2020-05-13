@@ -22,35 +22,37 @@ func NewArchive(cli CLI, version string, repo repository.Repository) Command {
 // Run implements Command interface.
 func (c *Archive) Run(args []string) int {
 	if len(args) == 2 {
-		return c.archiveTodos(args)
+		return c.archiveAll(args)
 	}
 
-	return c.archiveTodo(args)
+	return c.archiveTodos(args)
 }
 
-func (c *Archive) archiveTodo(args []string) int {
-	id, err := strconv.Atoi(args[2])
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, err)
-		return 1
-	}
+func (c *Archive) archiveTodos(args []string) int {
+	for _, arg := range args[2:] {
+		id, err := strconv.Atoi(arg)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 
-	td, err := c.repo.Get(id)
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, err)
-		return 1
-	}
+		td, err := c.repo.Get(id)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 
-	err = c.archive(td)
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, err)
-		return 1
+		err = c.archive(td)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 	}
 
 	return 0
 }
 
-func (c *Archive) archiveTodos(args []string) int {
+func (c *Archive) archiveAll(args []string) int {
 	todos, err := c.repo.List()
 	if err != nil {
 		fmt.Fprintln(c.cli.ErrorWriter, err)

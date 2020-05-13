@@ -53,13 +53,13 @@ func usage() string {
 Usage:
   todo list
   todo add (-p | --parent <id>) <title>
-  todo delete <id>
+  todo delete <id>...
   todo move <id> <position>
   todo open <id>
-  todo done <id>
-  todo undone <id>
-  todo wait <id>
-  todo archive (<id>)
+  todo done <id>...
+  todo undone <id>...
+  todo wait <id>...
+  todo archive (<id>...)
   todo -h | --help
   todo -v | --version
 

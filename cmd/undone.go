@@ -26,19 +26,21 @@ func (c *Undone) Run(args []string) int {
 		return 1
 	}
 
-	id, err := strconv.Atoi(args[2])
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, err)
-		return 1
-	}
+	for _, arg := range args[2:] {
+		id, err := strconv.Atoi(arg)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 
-	td, err := c.repo.Get(id)
-	td.State = todo.Undone
+		td, err := c.repo.Get(id)
+		td.State = todo.Undone
 
-	err = c.repo.Update(td)
-	if err != nil {
-		fmt.Fprintln(c.cli.ErrorWriter, err)
-		return 1
+		err = c.repo.Update(td)
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 	}
 
 	return 0
