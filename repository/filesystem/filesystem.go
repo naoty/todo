@@ -286,28 +286,45 @@ func (repo *FileSystem) Move(id int, parent *int, position int) error {
 		return fmt.Errorf("position number must be larger than 0: %d", position)
 	}
 
-	to := position - 1
+	if id == *parent {
+		return fmt.Errorf("cannot move TODO under itself: %d", id)
+	}
 
-	st, err := repo.readIndex()
+	idx, err := repo.readIndex()
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
 
-	ids, _ := st.Todos[""]
-	if to >= len(ids) {
-		return fmt.Errorf("position number is too large: %d", position)
+	to := position - 1
+	toKey := ""
+	if *parent != 0 {
+		toKey = fmt.Sprintf("%d", *parent)
+	}
+
+	if to > len(idx.Todos[toKey]) {
+		return fmt.Errorf("position number is out of range: %d", position)
 	}
 
 	var from int
-	for j, _id := range ids {
-		if _id == id {
-			from = j
+	var fromKey string
+	for k, ids := range idx.Todos {
+		for i, _id := range ids {
+			if _id == id {
+				from = i
+				fromKey = k
+				break
+			}
 		}
 	}
 
-	st.Todos[""] = swapped(ids, from, to)
+	idx.Todos[fromKey] = append(idx.Todos[fromKey][:from], idx.Todos[fromKey][from+1:]...)
+	idx.Todos[toKey] = append(idx.Todos[toKey][:to], append([]int{id}, idx.Todos[toKey][to:]...)...)
 
-	err = repo.writeIndex(st)
+	if len(idx.Todos[fromKey]) == 0 {
+		delete(idx.Todos, fromKey)
+	}
+
+	err = repo.writeIndex(idx)
 	if err != nil {
 		return fmt.Errorf("failed to move TODO: %w", err)
 	}
@@ -373,24 +390,6 @@ func (repo *FileSystem) writeIndex(i *index) error {
 	}
 
 	return nil
-}
-
-func swapped(s []int, from, to int) []int {
-	if from < 0 || from >= len(s) {
-		return s
-	}
-
-	if to < 0 || to >= len(s) {
-		return s
-	}
-
-	copied := make([]int, len(s), cap(s))
-	copy(copied, s)
-
-	e := copied[from]
-	copied = append(copied[:from], copied[(from+1):]...)
-	copied = append(copied[:to], append([]int{e}, copied[to:]...)...)
-	return copied
 }
 
 func maxID(todos []*todo.Todo) int {
