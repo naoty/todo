@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/naoty/todo/repository"
 	"github.com/naoty/todo/todo"
@@ -21,38 +20,6 @@ func NewArchive(cli CLI, version string, repo repository.Repository) Command {
 
 // Run implements Command interface.
 func (c *Archive) Run(args []string) int {
-	if len(args) == 2 {
-		return c.archiveAll(args)
-	}
-
-	return c.archiveTodos(args)
-}
-
-func (c *Archive) archiveTodos(args []string) int {
-	for _, arg := range args[2:] {
-		id, err := strconv.Atoi(arg)
-		if err != nil {
-			fmt.Fprintln(c.cli.ErrorWriter, err)
-			return 1
-		}
-
-		td, err := c.repo.Get(id)
-		if err != nil {
-			fmt.Fprintln(c.cli.ErrorWriter, err)
-			return 1
-		}
-
-		err = c.archive(td)
-		if err != nil {
-			fmt.Fprintln(c.cli.ErrorWriter, err)
-			return 1
-		}
-	}
-
-	return 0
-}
-
-func (c *Archive) archiveAll(args []string) int {
 	todos, err := c.repo.List()
 	if err != nil {
 		fmt.Fprintln(c.cli.ErrorWriter, err)
@@ -60,7 +27,11 @@ func (c *Archive) archiveAll(args []string) int {
 	}
 
 	for _, td := range todos {
-		err := c.archive(td)
+		if td.State != todo.Done {
+			continue
+		}
+
+		err := c.repo.Archive(td.ID)
 		if err != nil {
 			fmt.Fprintln(c.cli.ErrorWriter, err)
 			return 1
@@ -68,23 +39,4 @@ func (c *Archive) archiveAll(args []string) int {
 	}
 
 	return 0
-}
-
-func (c *Archive) archive(td *todo.Todo) error {
-	if td.State == todo.Done {
-		td.State = todo.Archived
-		err := c.repo.Update(td)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, sub := range td.Todos {
-		err := c.archive(sub)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

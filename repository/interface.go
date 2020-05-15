@@ -11,4 +11,5 @@ type Repository interface {
 	Delete(id int) error
 	Open(id int) error
 	Move(id int, parent *int, position int) error
+	Archive(id int) error
 }

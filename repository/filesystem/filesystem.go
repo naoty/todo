@@ -19,7 +19,8 @@ type FileSystem struct {
 }
 
 type index struct {
-	Todos map[string][]int `json:"todos"`
+	Todos    map[string][]int `json:"todos"`
+	Archived map[string][]int `json:"archived"`
 }
 
 // New returns a new FileSystem.
@@ -332,6 +333,46 @@ func (repo *FileSystem) Move(id int, parent *int, position int) error {
 	return nil
 }
 
+// Archive implements Repository interface.
+func (repo *FileSystem) Archive(id int) error {
+	idx, err := repo.readIndex()
+	if err != nil {
+		return fmt.Errorf("failed to move TODO: %w", err)
+	}
+
+	key := ""
+	index := 0
+	for k, ids := range idx.Todos {
+		for i, _id := range ids {
+			if _id == id {
+				key = k
+				index = i
+				break
+			}
+		}
+	}
+
+	idx.Todos[key] = append(idx.Todos[key][:index], idx.Todos[key][index+1:]...)
+	idx.Archived[key] = append(idx.Archived[key], id)
+
+	if len(idx.Todos[key]) == 0 {
+		delete(idx.Todos, key)
+	}
+
+	key = fmt.Sprintf("%d", id)
+	if _, ok := idx.Todos[key]; ok {
+		idx.Archived[key] = append(idx.Archived[key], idx.Todos[key]...)
+		delete(idx.Todos, key)
+	}
+
+	err = repo.writeIndex(idx)
+	if err != nil {
+		return fmt.Errorf("failed to move TODO: %w", err)
+	}
+
+	return nil
+}
+
 func parseID(path string) (int, error) {
 	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
 	return strconv.Atoi(text)
@@ -353,6 +394,7 @@ func (repo *FileSystem) readIndex() (*index, error) {
 			Todos: map[string][]int{
 				"": {},
 			},
+			Archived: map[string][]int{},
 		}, nil
 	}
 
