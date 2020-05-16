@@ -230,7 +230,10 @@ func (repo *FileSystem) Delete(id int) error {
 	path := filepath.Join(repo.root, filename)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("file not found: %s", path)
+		path = filepath.Join(repo.archivedDir, filename)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("file not found: %s", path)
+		}
 	}
 
 	err := os.Remove(path)
@@ -257,7 +260,10 @@ func (repo *FileSystem) Delete(id int) error {
 			path := filepath.Join(repo.root, filename)
 
 			if _, err := os.Stat(path); os.IsNotExist(err) {
-				return fmt.Errorf("file not found: %s", path)
+				path = filepath.Join(repo.archivedDir, filename)
+				if _, err := os.Stat(path); os.IsNotExist(err) {
+					return fmt.Errorf("file not found: %s", path)
+				}
 			}
 
 			err := os.Remove(path)
