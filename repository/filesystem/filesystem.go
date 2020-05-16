@@ -497,7 +497,7 @@ func (repo *FileSystem) readIndex() (*index, error) {
 func (repo *FileSystem) writeIndex(i *index) error {
 	path := filepath.Join(repo.root, "index.json")
 
-	data, err := json.MarshalIndent(*i, "", "  ")
+	data, err := json.Marshal(*i)
 	if err != nil {
 		return fmt.Errorf("failed to write index to %s: %w", path, err)
 	}
