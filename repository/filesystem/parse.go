@@ -10,26 +10,26 @@ import (
 
 const separator = "---"
 
-type metadata struct {
+type frontmatter struct {
 	Title string
 	State string
 }
 
 // Parse parses given text into a *Todo.
 func Parse(text string) (*todo.Todo, error) {
-	frontmatter, body, err := splitFrontmatter(text)
+	fmText, body, err := splitFrontmatter(text)
 	if err != nil {
 		return nil, err
 	}
 
-	var meta metadata
-	err = yaml.Unmarshal([]byte(frontmatter), &meta)
+	var fm frontmatter
+	err = yaml.Unmarshal([]byte(fmText), &fm)
 	if err != nil {
 		return nil, err
 	}
 
 	state := todo.Undone
-	switch meta.State {
+	switch fm.State {
 	case "done":
 		state = todo.Done
 	case "waiting":
@@ -38,7 +38,7 @@ func Parse(text string) (*todo.Todo, error) {
 		state = todo.Archived
 	}
 
-	return &todo.Todo{ID: 0, Title: meta.Title, State: state, Body: body}, nil
+	return &todo.Todo{ID: 0, Title: fm.Title, State: state, Body: body}, nil
 }
 
 func splitFrontmatter(text string) (string, string, error) {

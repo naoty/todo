@@ -21,6 +21,11 @@ type FileSystem struct {
 type index struct {
 	Todos    map[string][]int `json:"todos"`
 	Archived map[string][]int `json:"archived"`
+	Metadata metadata         `json:"metadata"`
+}
+
+type metadata struct {
+	LastID int `json:"lastId"`
 }
 
 // New returns a new FileSystem.
@@ -139,7 +144,12 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 		return fmt.Errorf("parent not found: %d", *parent)
 	}
 
-	nextID := maxID(todos) + 1
+	idx, err := repo.readIndex()
+	if err != nil {
+		return fmt.Errorf("failed to add TODO: %w", err)
+	}
+
+	nextID := idx.generateNextID()
 	filename := fmt.Sprintf("%d.md", nextID)
 	path := filepath.Join(repo.root, filename)
 
@@ -159,18 +169,13 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
 
-	st, err := repo.readIndex()
-	if err != nil {
-		return fmt.Errorf("failed to add TODO: %w", err)
-	}
-
 	parentID := ""
 	if *parent > 0 {
 		parentID = fmt.Sprintf("%d", *parent)
 	}
 
-	st.Todos[parentID] = append(st.Todos[parentID], nextID)
-	err = repo.writeIndex(st)
+	idx.Todos[parentID] = append(idx.Todos[parentID], nextID)
+	err = repo.writeIndex(idx)
 	if err != nil {
 		return fmt.Errorf("failed to add TODO: %w", err)
 	}
@@ -390,7 +395,9 @@ state: undone
 func (repo *FileSystem) readIndex() (*index, error) {
 	path := filepath.Join(repo.root, "index.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
+		meta := metadata{LastID: 0}
 		return &index{
+			Metadata: meta,
 			Todos: map[string][]int{
 				"": {},
 			},
@@ -432,6 +439,12 @@ func (repo *FileSystem) writeIndex(i *index) error {
 	}
 
 	return nil
+}
+
+func (idx *index) generateNextID() int {
+	id := idx.Metadata.LastID + 1
+	idx.Metadata.LastID = id
+	return id
 }
 
 func maxID(todos []*todo.Todo) int {
