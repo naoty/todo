@@ -15,7 +15,8 @@ import (
 
 // FileSystem represents a repository backed by file system.
 type FileSystem struct {
-	root string
+	root        string
+	archivedDir string
 }
 
 type index struct {
@@ -40,14 +41,20 @@ func New() (*FileSystem, error) {
 		root = filepath.Join(home, ".todos")
 	}
 
+	archivedDir := filepath.Join(root, "archived")
 	if _, err := os.Stat(root); os.IsNotExist(err) {
 		err := os.Mkdir(root, 0755)
 		if err != nil {
 			return nil, err
 		}
+
+		err = os.Mkdir(archivedDir, 0755)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &FileSystem{root: root}, nil
+	return &FileSystem{root: root, archivedDir: archivedDir}, nil
 }
 
 // Get implements Repository interface.
