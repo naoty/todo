@@ -26,7 +26,8 @@ type index struct {
 }
 
 type metadata struct {
-	LastID int `json:"lastId"`
+	LastID     int   `json:"lastId"`
+	MissingIDs []int `json:"missingIds"`
 }
 
 // New returns a new FileSystem.
@@ -312,6 +313,8 @@ func (repo *FileSystem) Delete(id int) error {
 		idx.Archived[k] = _ids
 	}
 
+	idx.Metadata.MissingIDs = append(idx.Metadata.MissingIDs, id)
+
 	err = repo.writeIndex(idx)
 	if err != nil {
 		return fmt.Errorf("failed to delete TODO from index: %w", err)
@@ -461,7 +464,7 @@ state: undone
 func (repo *FileSystem) readIndex() (*index, error) {
 	path := filepath.Join(repo.root, "index.json")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		meta := metadata{LastID: 0}
+		meta := metadata{LastID: 0, MissingIDs: []int{}}
 		return &index{
 			Metadata: meta,
 			Todos: map[string][]int{
@@ -508,8 +511,14 @@ func (repo *FileSystem) writeIndex(i *index) error {
 }
 
 func (idx *index) generateNextID() int {
-	id := idx.Metadata.LastID + 1
-	idx.Metadata.LastID = id
+	if len(idx.Metadata.MissingIDs) == 0 {
+		id := idx.Metadata.LastID + 1
+		idx.Metadata.LastID = id
+		return id
+	}
+
+	id := idx.Metadata.MissingIDs[0]
+	idx.Metadata.MissingIDs = idx.Metadata.MissingIDs[1:]
 	return id
 }
 
