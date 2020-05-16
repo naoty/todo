@@ -34,8 +34,12 @@ func (c *Done) Run(args []string) int {
 		}
 
 		td, err := c.repo.Get(id)
-		td.State = todo.Done
+		if err != nil {
+			fmt.Fprintln(c.cli.ErrorWriter, err)
+			return 1
+		}
 
+		td.State = todo.Done
 		err = c.repo.Update(td)
 		if err != nil {
 			fmt.Fprintln(c.cli.ErrorWriter, err)

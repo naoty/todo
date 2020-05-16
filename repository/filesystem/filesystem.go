@@ -63,7 +63,10 @@ func (repo *FileSystem) Get(id int) (*todo.Todo, error) {
 	path := filepath.Join(repo.root, filename)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("TODO not found: %d", id)
+		path = filepath.Join(repo.archivedDir, filename)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return nil, fmt.Errorf("TODO not found: %d", id)
+		}
 	}
 
 	file, err := os.Open(path)
@@ -200,7 +203,10 @@ func (repo *FileSystem) Update(td *todo.Todo) error {
 	path := filepath.Join(repo.root, filename)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("file not found: %s", path)
+		path = filepath.Join(repo.archivedDir, filename)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return fmt.Errorf("file not found: %s", path)
+		}
 	}
 
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_TRUNC, 0644)
