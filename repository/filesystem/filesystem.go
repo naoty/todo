@@ -95,6 +95,10 @@ func (repo *FileSystem) List() ([]*todo.Todo, error) {
 			return err
 		}
 
+		if info.IsDir() && strings.HasSuffix(path, "archived") {
+			return filepath.SkipDir
+		}
+
 		if !strings.HasSuffix(path, ".md") {
 			return nil
 		}
@@ -374,7 +378,15 @@ func (repo *FileSystem) Move(id int, parent *int, position int) error {
 func (repo *FileSystem) Archive(id int) error {
 	idx, err := repo.readIndex()
 	if err != nil {
-		return fmt.Errorf("failed to move TODO: %w", err)
+		return fmt.Errorf("failed to archive TODO: %w", err)
+	}
+
+	filename := fmt.Sprintf("%d.md", id)
+	path := filepath.Join(repo.root, filename)
+	archivedPath := filepath.Join(repo.archivedDir, filename)
+	err = os.Rename(path, archivedPath)
+	if err != nil {
+		return fmt.Errorf("failed to archive TODO: %w", err)
 	}
 
 	key := ""
@@ -397,7 +409,17 @@ func (repo *FileSystem) Archive(id int) error {
 	}
 
 	key = fmt.Sprintf("%d", id)
-	if _, ok := idx.Todos[key]; ok {
+	if subIDs, ok := idx.Todos[key]; ok {
+		for _, subID := range subIDs {
+			filename := fmt.Sprintf("%d.md", subID)
+			path := filepath.Join(repo.root, filename)
+			archivedPath := filepath.Join(repo.archivedDir, filename)
+			err := os.Rename(path, archivedPath)
+			if err != nil {
+				return fmt.Errorf("failed to archive TODO: %w", err)
+			}
+		}
+
 		idx.Archived[key] = append(idx.Archived[key], idx.Todos[key]...)
 		delete(idx.Todos, key)
 	}
