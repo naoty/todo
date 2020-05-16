@@ -305,7 +305,7 @@ func (repo *FileSystem) Delete(id int) error {
 		}
 
 		if len(_ids) == 0 {
-			delete(idx.Todos, k)
+			delete(idx.Archived, k)
 			continue
 		}
 
