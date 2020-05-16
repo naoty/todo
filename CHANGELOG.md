@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+## 0.4.0
+
+### Changed
+* Rewrite all codes from scratch.
+
 ## 0.3.1
 
-## Fixed
+### Fixed
 * Fix `next` command to show a todo when the subtodos of the todo are all done. 
 
 ## 0.3.0
