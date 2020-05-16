@@ -221,15 +221,20 @@ func (repo *FileSystem) Delete(id int) error {
 		return fmt.Errorf("failed to delete TODO: %w", err)
 	}
 
-	index, err := repo.readIndex()
+	idx, err := repo.readIndex()
 	if err != nil {
 		return fmt.Errorf("failed to delete TODO from index: %w", err)
 	}
 
 	key := fmt.Sprintf("%d", id)
-	subIDs, ok := index.Todos[key]
+	subIDs, ok := idx.Todos[key]
+
+	if !ok {
+		subIDs, ok = idx.Archived[key]
+	}
 
 	if ok {
+		// Delete files of sub-TODOs of a deleted TODO
 		for _, id := range subIDs {
 			filename := fmt.Sprintf("%d.md", id)
 			path := filepath.Join(repo.root, filename)
@@ -245,26 +250,46 @@ func (repo *FileSystem) Delete(id int) error {
 		}
 	}
 
-	delete(index.Todos, key)
+	// Delete the IDs of sub-TODOs of deleted TODO from index.json
+	delete(idx.Todos, key)
+	delete(idx.Archived, key)
 
-	for k, todos := range index.Todos {
-		var ids []int
-		for _, _id := range todos {
+	// Delete the ID of deleted TODO from index.json
+	for k, ids := range idx.Todos {
+		var _ids []int
+		for _, _id := range ids {
 			if _id == id {
 				continue
 			}
-			ids = append(ids, _id)
+			_ids = append(_ids, _id)
 		}
 
-		if len(ids) == 0 {
-			delete(index.Todos, k)
+		if len(_ids) == 0 {
+			delete(idx.Todos, k)
 			continue
 		}
 
-		index.Todos[k] = ids
+		idx.Todos[k] = _ids
 	}
 
-	err = repo.writeIndex(index)
+	for k, ids := range idx.Archived {
+		var _ids []int
+		for _, _id := range ids {
+			if _id == id {
+				continue
+			}
+			_ids = append(_ids, _id)
+		}
+
+		if len(_ids) == 0 {
+			delete(idx.Todos, k)
+			continue
+		}
+
+		idx.Archived[k] = _ids
+	}
+
+	err = repo.writeIndex(idx)
 	if err != nil {
 		return fmt.Errorf("failed to delete TODO from index: %w", err)
 	}
