@@ -4,6 +4,8 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+      - -X main.Version={{.Version}}
 archives:
   - replacements:
       darwin: Darwin
