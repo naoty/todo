@@ -23,9 +23,6 @@ const (
 
 	// Waiting represents state of TODO which I'm waiting for someone to finish.
 	Waiting State = "WAITING"
-
-	// Archived represents state of archived TODO.
-	Archived State = "ARCHIVED"
 )
 
 func (td *Todo) String() string {

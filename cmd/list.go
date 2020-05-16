@@ -43,8 +43,6 @@ func (c *List) printTodos(td *todo.Todo, level int) {
 		mark = "[x]"
 	case todo.Waiting:
 		mark = "[w]"
-	case todo.Archived:
-		return
 	}
 
 	indent := strings.Repeat(" ", level*2)

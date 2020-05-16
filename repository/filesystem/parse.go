@@ -34,8 +34,6 @@ func Parse(text string) (*todo.Todo, error) {
 		state = todo.Done
 	case "waiting":
 		state = todo.Waiting
-	case "archived":
-		state = todo.Archived
 	}
 
 	return &todo.Todo{ID: 0, Title: fm.Title, State: state, Body: body}, nil

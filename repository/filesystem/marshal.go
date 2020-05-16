@@ -20,8 +20,6 @@ func Marshal(td *todo.Todo) []byte {
 		lines = append(lines, "state: done")
 	case todo.Waiting:
 		lines = append(lines, "state: waiting")
-	case todo.Archived:
-		lines = append(lines, "state: archived")
 	}
 
 	lines = append(lines, "---")
