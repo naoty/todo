@@ -19,12 +19,6 @@ type FileSystem struct {
 	archivedDir string
 }
 
-type index struct {
-	Todos    map[string][]int `json:"todos"`
-	Archived map[string][]int `json:"archived"`
-	Metadata metadata         `json:"metadata"`
-}
-
 type metadata struct {
 	LastID     int   `json:"lastId"`
 	MissingIDs []int `json:"missingIds"`
@@ -398,6 +392,17 @@ func (repo *FileSystem) Archive(id int) error {
 
 	filename := fmt.Sprintf("%d.md", id)
 	path := filepath.Join(repo.root, filename)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		// Keep consistentency between files and index.json
+		idx.removeID(id)
+		err := repo.writeIndex(idx)
+		if err != nil {
+			return fmt.Errorf("failed to archive TODO: %w", err)
+		}
+
+		return fmt.Errorf("file not found: %s", path)
+	}
+
 	archivedPath := filepath.Join(repo.archivedDir, filename)
 	err = os.Rename(path, archivedPath)
 	if err != nil {
@@ -445,20 +450,6 @@ func (repo *FileSystem) Archive(id int) error {
 	}
 
 	return nil
-}
-
-func parseID(path string) (int, error) {
-	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
-	return strconv.Atoi(text)
-}
-
-func newContent(title string) string {
-	return strings.Trim(fmt.Sprintf(`
----
-title: %s
-state: undone
----
-`, title), "\n")
 }
 
 func (repo *FileSystem) readIndex() (*index, error) {
@@ -510,16 +501,18 @@ func (repo *FileSystem) writeIndex(i *index) error {
 	return nil
 }
 
-func (idx *index) generateNextID() int {
-	if len(idx.Metadata.MissingIDs) == 0 {
-		id := idx.Metadata.LastID + 1
-		idx.Metadata.LastID = id
-		return id
-	}
+func parseID(path string) (int, error) {
+	text := strings.TrimRight(filepath.Base(path), filepath.Ext(path))
+	return strconv.Atoi(text)
+}
 
-	id := idx.Metadata.MissingIDs[0]
-	idx.Metadata.MissingIDs = idx.Metadata.MissingIDs[1:]
-	return id
+func newContent(title string) string {
+	return strings.Trim(fmt.Sprintf(`
+---
+title: %s
+state: undone
+---
+`, title), "\n")
 }
 
 func maxID(todos []*todo.Todo) int {
