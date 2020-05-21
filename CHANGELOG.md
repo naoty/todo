@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+* `archive` command archives all done sub-TODOs of undone TODOs.
+
+### Changed
+* Remove all IDs from index.json when there are not corresponding files under `$TODOS_PATH`.
+
 ## 0.4.0
 
 ### Changed
