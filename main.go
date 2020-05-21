@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/naoty/todo/cmd"
 	"github.com/naoty/todo/repository/filesystem"
@@ -19,7 +20,8 @@ func main() {
 		ErrorWriter: os.Stderr,
 	}
 
-	repo, err := filesystem.New()
+	root := rootPath()
+	repo, err := filesystem.New(root)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -29,4 +31,18 @@ func main() {
 	command := commandFactory(stdio, Version, repo)
 	status := command.Run(os.Args)
 	os.Exit(status)
+}
+
+func rootPath() string {
+	root := os.Getenv("TODOS_PATH")
+	if root == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		root = filepath.Join(home, ".todos")
+	}
+
+	return root
 }
