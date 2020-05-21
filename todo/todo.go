@@ -28,3 +28,39 @@ const (
 func (td *Todo) String() string {
 	return fmt.Sprintf("%#v", td)
 }
+
+// Equal compares self and another TODO deeply.
+func (td *Todo) Equal(another *Todo) bool {
+	if another == nil {
+		return false
+	}
+
+	if td.ID != another.ID {
+		return false
+	}
+
+	if td.Title != another.Title {
+		return false
+	}
+
+	if td.State != another.State {
+		return false
+	}
+
+	if td.Body != another.Body {
+		return false
+	}
+
+	if len(td.Todos) != len(another.Todos) {
+		return false
+	}
+
+	for i, sub := range td.Todos {
+		equal := sub.Equal(another.Todos[i])
+		if !equal {
+			return false
+		}
+	}
+
+	return true
+}
