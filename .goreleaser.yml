@@ -23,3 +23,12 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+brews:
+  - github:
+      owner: naoty
+      name: homebrew-misc
+    folder: Formula
+    homepage: https://github.com/naoty/todo
+    description: A TODO manager just for me
+    install: |
+      bin.install "todo"
