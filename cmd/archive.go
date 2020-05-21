@@ -27,11 +27,7 @@ func (c *Archive) Run(args []string) int {
 	}
 
 	for _, td := range todos {
-		if td.State != todo.Done {
-			continue
-		}
-
-		err := c.repo.Archive(td.ID)
+		err := c.runArchive(td)
 		if err != nil {
 			fmt.Fprintln(c.cli.ErrorWriter, err)
 			return 1
@@ -39,4 +35,22 @@ func (c *Archive) Run(args []string) int {
 	}
 
 	return 0
+}
+
+func (c *Archive) runArchive(td *todo.Todo) error {
+	if td.State == todo.Done {
+		err := c.repo.Archive(td.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, sub := range td.Todos {
+		err := c.runArchive(sub)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
