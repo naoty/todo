@@ -3,6 +3,7 @@ package filesystem_test
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/naoty/todo/repository/filesystem"
@@ -42,5 +43,27 @@ func TestGet(t *testing.T) {
 				t.Errorf("got: %+v, want: %+v", td, testcase.output)
 			}
 		})
+	}
+}
+
+func TestList(t *testing.T) {
+	repo, err := filesystem.New("./testdata")
+	if err != nil {
+		t.Fatalf("failed to initialize repository: %v", err)
+	}
+
+	todos, err := repo.List()
+	if err != nil {
+		t.Fatalf("failed to list todos")
+	}
+
+	ids := make([]int, 3)
+	for i, td := range todos {
+		ids[i] = td.ID
+	}
+
+	want := []int{2, 1, 3}
+	if !reflect.DeepEqual(ids, want) {
+		t.Errorf("got: %v, want: %v", ids, want)
 	}
 }
