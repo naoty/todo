@@ -3,6 +3,7 @@ package filesystem_test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -69,5 +70,38 @@ func TestList(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
+	repo, err := filesystem.New("./testdata/sandbox")
+	if err != nil {
+		t.Fatalf("failed to initialize repository: %v", err)
+	}
 
+	t.Cleanup(func() {
+		err := os.RemoveAll("./testdata/sandbox")
+		if err != nil {
+			t.Fatalf("failed to cleanup sandbox: %v", err)
+		}
+	})
+
+	parent := 0
+	err = repo.Add("dummy", &parent)
+	if err != nil {
+		t.Fatalf("failed to add a TODO")
+	}
+
+	td, err := repo.Get(1)
+	if err != nil {
+		t.Fatalf("failed to get a new TODO")
+	}
+
+	if td.Title != "dummy" {
+		t.Errorf("got: %s, want: dummy", td.Title)
+	}
+
+	if td.State != todo.Undone {
+		t.Errorf("got: %s, want: %s", td.State, todo.Undone)
+	}
+
+	if td.Body != "" {
+		t.Errorf("got: %s, want: ''", td.Body)
+	}
 }
