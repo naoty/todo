@@ -22,7 +22,7 @@ func TestGet(t *testing.T) {
 		{1000, nil, filesystem.ErrTODONotFound},
 	}
 
-	repo, err := filesystem.New("./testdata")
+	repo, err := filesystem.New("./testdata/todos")
 	if err != nil {
 		t.Fatalf("failed to initialize repository: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	repo, err := filesystem.New("./testdata")
+	repo, err := filesystem.New("./testdata/todos")
 	if err != nil {
 		t.Fatalf("failed to initialize repository: %v", err)
 	}
@@ -66,4 +66,8 @@ func TestList(t *testing.T) {
 	if !reflect.DeepEqual(ids, want) {
 		t.Errorf("got: %v, want: %v", ids, want)
 	}
+}
+
+func TestAdd(t *testing.T) {
+
 }
