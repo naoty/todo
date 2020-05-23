@@ -105,3 +105,43 @@ func TestAdd(t *testing.T) {
 		t.Errorf("got: %s, want: ''", td.Body)
 	}
 }
+
+func TestUpdate(t *testing.T) {
+	repo, err := filesystem.New("./testdata/sandbox")
+	if err != nil {
+		t.Fatalf("failed to initialize repository: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := os.RemoveAll("./testdata/sandbox")
+		if err != nil {
+			t.Fatalf("failed to cleanup sandbox: %v", err)
+		}
+	})
+
+	parent := 0
+	err = repo.Add("dummy", &parent)
+	if err != nil {
+		t.Fatal("failed to add a TODO")
+	}
+
+	td, err := repo.Get(1)
+	if err != nil {
+		t.Fatal("failed to get a new TODO")
+	}
+
+	td.State = todo.Done
+	err = repo.Update(td)
+	if err != nil {
+		t.Fatal("failed to update a TODO")
+	}
+
+	td, err = repo.Get(1)
+	if err != nil {
+		t.Fatal("failed to get a new TODO")
+	}
+
+	if td.State != todo.Done {
+		t.Errorf("got: %s, want: %s", td.State, todo.Done)
+	}
+}
