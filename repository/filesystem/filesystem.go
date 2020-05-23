@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -23,6 +24,11 @@ type metadata struct {
 	LastID     int   `json:"lastId"`
 	MissingIDs []int `json:"missingIds"`
 }
+
+var (
+	// ErrTODONotFound represents an error occured when TODO is not found.
+	ErrTODONotFound = errors.New("TODO not found")
+)
 
 // New returns a new FileSystem.
 func New(root string) (*FileSystem, error) {
@@ -51,7 +57,7 @@ func (repo *FileSystem) Get(id int) (*todo.Todo, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		path = filepath.Join(repo.archivedDir, filename)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			return nil, fmt.Errorf("TODO not found: %d", id)
+			return nil, fmt.Errorf("%w: %d", ErrTODONotFound, id)
 		}
 	}
 
@@ -141,7 +147,7 @@ func (repo *FileSystem) Add(title string, parent *int) error {
 	}
 
 	if *parent > 0 && !isExists(todos, *parent) {
-		return fmt.Errorf("parent not found: %d", *parent)
+		return fmt.Errorf("%w: %d", ErrTODONotFound, *parent)
 	}
 
 	idx, err := repo.readIndex()
