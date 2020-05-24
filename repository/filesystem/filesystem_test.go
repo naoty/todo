@@ -174,3 +174,53 @@ func TestDelete(t *testing.T) {
 		t.Error("1.md is not deleted")
 	}
 }
+
+func TestMove(t *testing.T) {
+	testcases := []struct {
+		id       int
+		parent   int
+		position int
+		want     []int
+	}{
+		{3, 0, 1, []int{3, 1, 2}},
+	}
+
+	for _, testcase := range testcases {
+
+		repo, err := filesystem.New("./testdata/sandbox")
+		if err != nil {
+			t.Fatalf("failed to initialize repository: %v", err)
+		}
+
+		t.Cleanup(func() {
+			err := os.RemoveAll("./testdata/sandbox")
+			if err != nil {
+				t.Fatalf("failed to cleanup sandbox: %v", err)
+			}
+		})
+
+		parent := 0
+		for i := 0; i < 3; i++ {
+			err = repo.Add("dummy", &parent)
+			if err != nil {
+				t.Fatal("failed to add a TODO")
+			}
+		}
+
+		err = repo.Move(testcase.id, &testcase.parent, testcase.position)
+		if err != nil {
+			t.Fatal("failed to move a TODO")
+		}
+
+		todos, err := repo.List()
+
+		ids := make([]int, len(todos))
+		for i, td := range todos {
+			ids[i] = td.ID
+		}
+
+		if !reflect.DeepEqual(ids, testcase.want) {
+			t.Errorf("got: %v, want: %v", ids, testcase.want)
+		}
+	}
+}
