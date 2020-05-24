@@ -145,3 +145,32 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("got: %s, want: %s", td.State, todo.Done)
 	}
 }
+
+func TestDelete(t *testing.T) {
+	repo, err := filesystem.New("./testdata/sandbox")
+	if err != nil {
+		t.Fatalf("failed to initialize repository: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := os.RemoveAll("./testdata/sandbox")
+		if err != nil {
+			t.Fatalf("failed to cleanup sandbox: %v", err)
+		}
+	})
+
+	parent := 0
+	err = repo.Add("dummy", &parent)
+	if err != nil {
+		t.Fatal("failed to add a TODO")
+	}
+
+	err = repo.Delete(1)
+	if err != nil {
+		t.Fatal("failed to delete a TODO")
+	}
+
+	if _, err := os.Stat("./testdata/sandbox/1.md"); os.IsExist(err) {
+		t.Error("1.md is not deleted")
+	}
+}
