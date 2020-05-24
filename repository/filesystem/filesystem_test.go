@@ -224,3 +224,37 @@ func TestMove(t *testing.T) {
 		}
 	}
 }
+
+func TestArchive(t *testing.T) {
+	repo, err := filesystem.New("./testdata/sandbox")
+	if err != nil {
+		t.Fatalf("failed to initialize repository: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := os.RemoveAll("./testdata/sandbox")
+		if err != nil {
+			t.Fatalf("failed to cleanup sandbox: %v", err)
+		}
+	})
+
+	parent := 0
+	err = repo.Add("dummy", &parent)
+	if err != nil {
+		t.Fatal("failed to add a TODO")
+	}
+
+	err = repo.Archive(1)
+	if err != nil {
+		t.Fatal("failed to archive a TODO")
+	}
+
+	if _, err := os.Stat("./testdata/sandbox/archived/1.md"); os.IsNotExist(err) {
+		t.Fatal("archived TODO is deleted")
+	}
+
+	todos, err := repo.List()
+	if len(todos) != 0 {
+		t.Errorf("got: %d, want: 0", len(todos))
+	}
+}
