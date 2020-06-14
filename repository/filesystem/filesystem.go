@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/naoty/todo/repository"
 	"github.com/naoty/todo/todo"
 )
 
@@ -397,7 +398,7 @@ func (repo *FileSystem) Archive(id int) error {
 			return fmt.Errorf("failed to archive TODO: %w", err)
 		}
 
-		return fmt.Errorf("file not found: %s", path)
+		return repository.NotFoundError{Path: path}
 	}
 
 	archivedPath := filepath.Join(repo.archivedDir, filename)

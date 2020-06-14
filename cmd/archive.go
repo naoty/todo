@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/naoty/todo/repository"
@@ -47,6 +48,14 @@ func (c *Archive) runArchive(td *todo.Todo) error {
 
 	for _, sub := range td.Todos {
 		err := c.runArchive(sub)
+
+		// Continue to archive TODOs even if some TODO files are not found.
+		var notFound repository.NotFoundError
+		if errors.As(err, &notFound) {
+			fmt.Fprintln(c.cli.ErrorWriter, notFound)
+			continue
+		}
+
 		if err != nil {
 			return err
 		}
