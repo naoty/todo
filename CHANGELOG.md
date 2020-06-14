@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.2 - 2020-06-14
+
 ### Changed
 * `archive` command continues to archive all done TODOs even if some TODO files are not found.
 
