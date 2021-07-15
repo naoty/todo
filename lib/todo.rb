@@ -1,3 +1,3 @@
 module Todo
-  autoload :CLI, 'todo/cli'
+  autoload :CLI, "todo/cli"
 end
