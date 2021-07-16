@@ -31,5 +31,15 @@ RSpec.describe Todo::CLI do
         end
       end
     end
+
+    ["-v", "--version"].each do |flag|
+      context "when arguments include '#{flag}' flag" do
+        it "puts version to output" do
+          cli = Todo::CLI.new(arguments: [flag], output: output, error_output: error_output)
+          cli.run
+          expect(output.string).to eq("#{Todo::VERSION}\n")
+        end
+      end
+    end
   end
 end

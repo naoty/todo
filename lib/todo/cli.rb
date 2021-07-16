@@ -2,9 +2,11 @@ class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       blog -h | --help
+      blog -v | --version
     
     Options:
-      -h --help  Show this message
+      -h --help     Show this message
+      -v --version  Show version
   TEXT
 
   private attr_reader :arguments, :output, :error_output
@@ -23,6 +25,11 @@ class Todo::CLI
 
     if arguments.first == "-h" || arguments.first == "--help"
       output.puts(HELP_MESSAGE)
+      return
+    end
+
+    if arguments.first == "-v" || arguments.first == "--version"
+      output.puts(Todo::VERSION)
       return
     end
 
