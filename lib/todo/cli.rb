@@ -16,6 +16,11 @@ class Todo::CLI
   end
 
   def run
+    if arguments.empty?
+      error_output.puts(HELP_MESSAGE)
+      exit 1
+    end
+
     if arguments.first == "-h" || arguments.first == "--help"
       output.puts(HELP_MESSAGE)
       return
