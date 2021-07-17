@@ -72,4 +72,52 @@ RSpec.describe Todo::FileRepository do
       end
     end
   end
+
+  describe "#create" do
+    around do |example|
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          example.run
+        end
+      end
+    end
+
+    it "creates a file" do
+      repository = Todo::FileRepository.new(root_path: Pathname.pwd)
+
+      todo1_path = Pathname.pwd.join("1.md")
+      expect { repository.create(title: "dummy 1") }.to change { todo1_path.exist? }.from(false).to(true)
+      expect(todo1_path.read).to eq(<<~TEXT)
+        ---
+        title: dummy 1
+        status: undone
+        ---
+
+
+      TEXT
+
+      todo2_path = Pathname.pwd.join("2.md")
+      expect { repository.create(title: "dummy 2") }.to change { todo2_path.exist? }.from(false).to(true)
+    end
+
+    it "updates index file" do
+      repository = Todo::FileRepository.new(root_path: Pathname.pwd)
+      index_path = Pathname.pwd.join("index.json")
+
+      original_index = {todos: {}, archived: {}, metadata: {lastId: 0, missingIds: []}}
+      expected_index1 = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
+      expect {
+        repository.create(title: "dummy 1")
+      }.to change {
+        JSON.parse(index_path.read, symbolize_names: true)
+      }.from(original_index).to(expected_index1)
+
+      expected_index2 = {todos: {"": [1, 2]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
+      expect {
+        repository.create(title: "dummy 2")
+      }.to change {
+        JSON.parse(index_path.read, symbolize_names: true)
+      }.from(expected_index1).to(expected_index2)
+    end
+  end
 end
