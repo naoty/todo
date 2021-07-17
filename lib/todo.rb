@@ -3,4 +3,5 @@ module Todo
 
   autoload :Add, "todo/add"
   autoload :CLI, "todo/cli"
+  autoload :Todo, "todo/todo"
 end
