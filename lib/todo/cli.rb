@@ -1,6 +1,7 @@
 class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
+      blog add
       blog -h | --help
       blog -v | --version
     
@@ -33,6 +34,34 @@ class Todo::CLI
       return
     end
 
-    raise NotImplementedError
+    command = build_command(name: arguments.first)
+    command.run
+  rescue CommandNotFound => exception
+    error_output.puts(exception.message)
+    exit 1
+  end
+
+  private
+
+  class CommandNotFound < StandardError
+    attr_reader :unknown_name
+
+    def initialize(unknown_name:)
+      super
+      @unknown_name = unknown_name
+    end
+
+    def message
+      "command not found: #{unknown_name}"
+    end
+  end
+
+  def build_command(name:)
+    case name
+    when "add"
+      Todo::Add.new
+    else
+      raise CommandNotFound.new(unknown_name: name)
+    end
   end
 end

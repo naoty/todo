@@ -6,6 +6,13 @@ RSpec.describe Todo::CLI do
     let(:output) { StringIO.new }
     let(:error_output) { StringIO.new }
 
+    shared_examples "exits with status code 1" do |arguments:|
+      it "exits with status code 1" do
+        cli = Todo::CLI.new(arguments: arguments, output: output, error_output: error_output)
+        expect { cli.run }.to raise_error(an_instance_of(SystemExit).and(having_attributes(status: 1)))
+      end
+    end
+
     context "when arguments are empty" do
       it "puts help message to error output" do
         cli = Todo::CLI.new(arguments: [], output: output, error_output: error_output)
@@ -16,10 +23,7 @@ RSpec.describe Todo::CLI do
         expect(error_output.string).to eq(Todo::CLI::HELP_MESSAGE)
       end
 
-      it "exits with status code 1" do
-        cli = Todo::CLI.new(arguments: [], output: output, error_output: error_output)
-        expect { cli.run }.to raise_error(an_instance_of(SystemExit).and(having_attributes(status: 1)))
-      end
+      include_examples "exits with status code 1", arguments: []
     end
 
     ["-h", "--help"].each do |flag|
@@ -39,6 +43,30 @@ RSpec.describe Todo::CLI do
           cli.run
           expect(output.string).to eq("#{Todo::VERSION}\n")
         end
+      end
+    end
+
+    context "when arguments include unknown command" do
+      it "puts error message to error output" do
+        cli = Todo::CLI.new(arguments: ["unknown"], output: output, error_output: error_output)
+        cli.run
+      rescue SystemExit
+        # ignore exit
+      ensure
+        expect(error_output.string).to eq("command not found: unknown\n")
+      end
+
+      include_examples "exits with status code 1", arguments: ["unknown"]
+    end
+
+    context "when arguments include 'add' command" do
+      it "calls Todo::Add#run" do
+        add = instance_double(Todo::Add)
+        allow(Todo::Add).to receive(:new).and_return(add)
+        expect(add).to receive(:run)
+
+        cli = Todo::CLI.new(arguments: ["add"], output: output, error_output: error_output)
+        cli.run
       end
     end
   end
