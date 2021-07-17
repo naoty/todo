@@ -1,9 +1,9 @@
 class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
-      blog add
-      blog -h | --help
-      blog -v | --version
+      todo add <title>
+      todo -h | --help
+      todo -v | --version
     
     Options:
       -h --help     Show this message
@@ -12,7 +12,7 @@ class Todo::CLI
 
   private attr_reader :arguments, :output, :error_output
 
-  def initialize(arguments: ARGV, output: $stdin, error_output: $stderr)
+  def initialize(arguments: ARGV, output: $stdout, error_output: $stderr)
     @arguments = arguments
     @output = output
     @error_output = error_output
@@ -34,7 +34,7 @@ class Todo::CLI
       return
     end
 
-    command = build_command(name: arguments.first)
+    command = build_command(name: arguments.first, arguments: arguments[1..])
     command.run
   rescue CommandNotFound => exception
     error_output.puts(exception.message)
@@ -56,10 +56,10 @@ class Todo::CLI
     end
   end
 
-  def build_command(name:)
+  def build_command(name:, arguments:)
     case name
     when "add"
-      Todo::Add.new
+      Todo::Add.new(arguments: arguments)
     else
       raise CommandNotFound.new(unknown_name: name)
     end
