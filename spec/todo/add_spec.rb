@@ -5,11 +5,12 @@ RSpec.describe Todo::Add do
   describe "#run" do
     let(:output) { StringIO.new }
     let(:error_output) { StringIO.new }
+    let(:repository) { instance_double(Todo::FileRepository) }
 
     context "when arguments are empty" do
       it "puts help message to error output" do
         add = Todo::Add.new(arguments: [], output: output, error_output: error_output)
-        add.run
+        add.run(repository: repository)
       rescue SystemExit
         # ignore exit
       ensure
@@ -18,7 +19,9 @@ RSpec.describe Todo::Add do
 
       it "exits with status code 1" do
         add = Todo::Add.new(arguments: [], output: output, error_output: error_output)
-        expect { add.run }.to raise_error(an_instance_of(SystemExit).and(having_attributes({status: 1})))
+        expect {
+          add.run(repository: repository)
+        }.to raise_error(an_instance_of(SystemExit).and(having_attributes({status: 1})))
       end
     end
 
@@ -26,9 +29,17 @@ RSpec.describe Todo::Add do
       context "when arguments include '#{flag}' flag" do
         it "puts help message to output" do
           add = Todo::Add.new(arguments: [flag], output: output, error_output: error_output)
-          add.run
+          add.run(repository: repository)
           expect(output.string).to eq(Todo::Add::HELP_MESSAGE)
         end
+      end
+    end
+
+    context "when arguments include title" do
+      it "calls FileRepository#create" do
+        add = Todo::Add.new(arguments: ["dummy"], output: output, error_output: error_output)
+        expect(repository).to receive(:create).with({title: "dummy"})
+        add.run(repository: repository)
       end
     end
   end

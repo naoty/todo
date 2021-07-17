@@ -16,7 +16,7 @@ class Todo::Add
     @error_output = error_output
   end
 
-  def run
+  def run(repository:)
     if arguments.empty?
       error_output.puts(HELP_MESSAGE)
       exit 1
@@ -27,6 +27,6 @@ class Todo::Add
       return
     end
 
-    raise NotImplementedError
+    repository.create(title: arguments.first)
   end
 end

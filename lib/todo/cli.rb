@@ -35,7 +35,8 @@ class Todo::CLI
     end
 
     command = build_command(name: arguments.first, arguments: arguments[1..])
-    command.run
+    repository = Todo::FileRepository.new(root_path: ENV["TODOS_PATH"] || Pathname.pwd)
+    command.run(repository: repository)
   rescue CommandNotFound => exception
     error_output.puts(exception.message)
     exit 1
