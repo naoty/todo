@@ -50,5 +50,26 @@ RSpec.describe Todo::FileRepository do
         expect(index_path.read.chomp).to eq(index_json)
       end
     end
+
+    context "when archived directory doesn't exist" do
+      it "creates archived directory" do
+        archived_path = Pathname.pwd.join("archived")
+        expect {
+          Todo::FileRepository.new(root_path: Pathname.pwd)
+        }.to change { archived_path.exist? }.from(false).to(true)
+        expect(archived_path).to be_directory
+      end
+    end
+
+    context "when archived directory exists" do
+      it "doesn't raise any errors" do
+        archived_path = Pathname.pwd.join("archived")
+        archived_path.mkdir
+
+        expect {
+          Todo::FileRepository.new(root_path: Pathname.pwd)
+        }.not_to raise_error
+      end
+    end
   end
 end

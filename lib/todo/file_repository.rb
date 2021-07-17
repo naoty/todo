@@ -13,6 +13,7 @@ class Todo::FileRepository
 
   def setup
     create_index_if_not_exist
+    create_archived_directory_if_not_exist
   end
 
   def create_index_if_not_exist
@@ -28,5 +29,12 @@ class Todo::FileRepository
       }
     })
     index_path.open("wb") { |file| file.puts(index_json) }
+  end
+
+  def create_archived_directory_if_not_exist
+    archived_path = root_path.join("archived")
+    return if archived_path.exist?
+
+    archived_path.mkdir
   end
 end
