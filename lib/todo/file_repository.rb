@@ -3,10 +3,12 @@ require "pathname"
 require "yaml"
 
 class Todo::FileRepository
-  private attr_reader :root_path
+  private attr_reader :root_path, :error_output
 
-  def initialize(root_path:)
+  def initialize(root_path:, error_output:)
     @root_path = Pathname.new(root_path)
+    @error_output = error_output
+
     setup
   end
 
@@ -15,10 +17,15 @@ class Todo::FileRepository
     todos = index[:todos][:""].map do |id|
       todo_path = root_path.join("#{id}.md")
 
-      # TODO: warn broken index file when todo file doesn't exist
-      return nil unless todo_path.exist?
+      unless todo_path.exist?
+        error_output.puts("todo file is not found: #{todo_path}")
+        return nil
+      end
 
-      decode(id: id, text: todo_path.read)
+      todo = decode(id: id, text: todo_path.read)
+      error_output.puts("todo file is broken: #{todo_path}") if todo.nil?
+
+      todo
     end
     todos.compact
   end
@@ -93,10 +100,8 @@ class Todo::FileRepository
   def decode(id:, text:)
     parts = text.split("---", 3).map(&:strip)
 
-    # TODO: raise exception if text is invalid
     return nil if parts.length < 3
 
-    # TODO: handle invalid yaml format
     front_matter = YAML.safe_load(parts[1], symbolize_names: true)
     Todo::Todo.new(
       id: id,
@@ -104,5 +109,7 @@ class Todo::FileRepository
       status: front_matter[:status].to_sym, # TODO: handle unknown status
       body: parts[2]
     )
+  rescue Psych::SyntaxError
+    nil
   end
 end
