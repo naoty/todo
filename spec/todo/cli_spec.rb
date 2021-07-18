@@ -59,14 +59,19 @@ RSpec.describe Todo::CLI do
       include_examples "exits with status code 1", arguments: ["unknown"]
     end
 
-    context "when arguments include 'add' command" do
-      it "calls Todo::Add#run" do
-        add = instance_double(Todo::Add)
-        allow(Todo::Add).to receive(:new).and_return(add)
-        expect(add).to receive(:run)
+    {
+      "add" => Todo::Add,
+      "list" => Todo::List
+    }.each do |command, klass|
+      context "when arguments include '#{command}' command" do
+        it "calls #{klass}#run" do
+          instance = instance_double(klass)
+          allow(klass).to receive(:new).and_return(instance)
+          expect(instance).to receive(:run)
 
-        cli = Todo::CLI.new(arguments: ["add"], output: output, error_output: error_output)
-        cli.run
+          cli = Todo::CLI.new(arguments: [command], output: output, error_output: error_output)
+          cli.run
+        end
       end
     end
   end

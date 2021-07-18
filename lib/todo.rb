@@ -4,5 +4,6 @@ module Todo
   autoload :Add, "todo/add"
   autoload :CLI, "todo/cli"
   autoload :FileRepository, "todo/file_repository"
+  autoload :List, "todo/list"
   autoload :Todo, "todo/todo"
 end

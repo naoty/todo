@@ -1,6 +1,7 @@
 class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
+      todo list
       todo add <title>
       todo -h | --help
       todo -v | --version
@@ -61,6 +62,8 @@ class Todo::CLI
     case name
     when "add"
       Todo::Add.new(arguments: arguments)
+    when "list"
+      Todo::List.new(arguments: arguments)
     else
       raise CommandNotFound.new(unknown_name: name)
     end
