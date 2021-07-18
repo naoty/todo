@@ -89,7 +89,7 @@ class Todo::FileRepository
   def encode(todo)
     <<~TEXT
       ---
-      title: #{todo.title}
+      title: #{YAML.dump(todo.title)}
       status: #{todo.status}
       ---
 
