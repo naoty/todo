@@ -73,6 +73,28 @@ RSpec.describe Todo::FileRepository do
     end
   end
 
+  describe "#list" do
+    around do |example|
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          example.run
+        end
+      end
+    end
+
+    it "returns todos" do
+      repository = Todo::FileRepository.new(root_path: Pathname.pwd)
+      repository.create(title: "dummy 1")
+      repository.create(title: "dummy 2")
+
+      todos = repository.list
+      expect(todos).to contain_exactly(
+        an_instance_of(Todo::Todo).and(having_attributes(id: 1)),
+        an_instance_of(Todo::Todo).and(having_attributes(id: 2))
+      )
+    end
+  end
+
   describe "#create" do
     around do |example|
       Dir.mktmpdir do |dir|
