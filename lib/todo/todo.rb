@@ -1,10 +1,10 @@
 class Todo::Todo
-  attr_reader :id, :title, :status, :body
+  attr_reader :id, :title, :state, :body
 
-  def initialize(id:, title:, status: :undone, body: "")
+  def initialize(id:, title:, state: :undone, body: "")
     @id = id
     @title = title
-    @status = status
+    @state = state
     @body = body
   end
 end

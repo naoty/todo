@@ -137,7 +137,7 @@ RSpec.describe Todo::FileRepository do
           file.puts(<<~TEXT)
             ---
             title: %
-            status: undone
+            state: undone
             ---
 
             body
@@ -167,7 +167,7 @@ RSpec.describe Todo::FileRepository do
       expect(todo1_path.read).to eq(<<~TEXT)
         ---
         title: dummy 1
-        status: undone
+        state: undone
         ---
 
 

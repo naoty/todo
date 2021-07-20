@@ -31,7 +31,7 @@ class Todo::FileRepository
   end
 
   def create(title:)
-    todo = Todo::Todo.new(id: next_id, title: title, status: :undone, body: "")
+    todo = Todo::Todo.new(id: next_id, title: title, state: :undone, body: "")
     todo_path = root_path.join("#{todo.id}.md")
     encoded_todo = encode(todo)
     todo_path.open("wb") { |file| file.puts(encoded_todo) }
@@ -89,8 +89,8 @@ class Todo::FileRepository
   def encode(todo)
     <<~TEXT
       ---
-      title: #{YAML.dump(todo.title)}
-      status: #{todo.status}
+      title: #{todo.title}
+      state: #{todo.state}
       ---
 
       #{todo.body}
@@ -106,7 +106,7 @@ class Todo::FileRepository
     Todo::Todo.new(
       id: id,
       title: front_matter[:title],
-      status: front_matter[:status].to_sym, # TODO: handle unknown status
+      state: front_matter[:state]&.to_sym || :undone, # TODO: handle unknown status
       body: parts[2]
     )
   rescue Psych::SyntaxError
