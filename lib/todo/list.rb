@@ -1,4 +1,13 @@
 class Todo::List
+  HELP_MESSAGE = <<~TEXT.freeze
+    Usage:
+      todo list
+      todo -h | --help
+    
+    Options:
+      -h --help  Show this message
+  TEXT
+
   private attr_reader :arguments, :output, :error_output
 
   def initialize(arguments:, output: $stdout, error_output: $stderr)
@@ -8,6 +17,11 @@ class Todo::List
   end
 
   def run(repository:)
+    if arguments.first == "-h" || arguments.first == "--help"
+      output.puts(HELP_MESSAGE)
+      return
+    end
+
     todos = repository.list
     id_width = todos.map { |todo| todo.id.digits.length }.max
 
