@@ -8,6 +8,25 @@ class Todo::List
   end
 
   def run(repository:)
-    raise NotImplementedError
+    todos = repository.list
+    id_width = todos.map { |todo| todo.id.digits.length }.max
+
+    todos.each do |todo|
+      output.puts(format_todo(todo, id_width: id_width))
+    end
+  end
+
+  private
+
+  def format_todo(todo, id_width:)
+    indent = " " * 2
+    right_aligned_id = todo.id.to_s.rjust(id_width, " ")
+    decorated_title =
+      case todo.state
+      when :undone then todo.title
+      when :waiting then "\e[2m#{todo.title}\e[0m" # dim
+      when :done then "\e[2;9m#{todo.title}\e[0m" # dim + strikethrough
+      end
+    "#{indent}#{right_aligned_id} | #{decorated_title}"
   end
 end
