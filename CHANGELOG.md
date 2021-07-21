@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+* `list` command shows TODOs in a new format.
+
 ## 0.4.2 - 2020-06-14
 
 ### Changed
