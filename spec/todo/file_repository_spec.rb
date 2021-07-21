@@ -159,42 +159,75 @@ RSpec.describe Todo::FileRepository do
       end
     end
 
-    it "creates a file" do
-      repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+    context "when missing IDs are empty" do
+      it "creates a file" do
+        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
 
-      todo1_path = Pathname.pwd.join("1.md")
-      expect { repository.create(title: "dummy 1") }.to change { todo1_path.exist? }.from(false).to(true)
-      expect(todo1_path.read).to eq(<<~TEXT)
-        ---
-        title: dummy 1
-        state: undone
-        ---
+        todo1_path = Pathname.pwd.join("1.md")
+        expect { repository.create(title: "dummy 1") }.to change { todo1_path.exist? }.from(false).to(true)
+        expect(todo1_path.read).to eq(<<~TEXT)
+          ---
+          title: dummy 1
+          state: undone
+          ---
 
 
-      TEXT
+        TEXT
 
-      todo2_path = Pathname.pwd.join("2.md")
-      expect { repository.create(title: "dummy 2") }.to change { todo2_path.exist? }.from(false).to(true)
+        todo2_path = Pathname.pwd.join("2.md")
+        expect { repository.create(title: "dummy 2") }.to change { todo2_path.exist? }.from(false).to(true)
+      end
+
+      it "updates index file" do
+        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+        index_path = Pathname.pwd.join("index.json")
+
+        original_index = {todos: {}, archived: {}, metadata: {lastId: 0, missingIds: []}}
+        expected_index1 = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
+        expected_index2 = {todos: {"": [1, 2]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
+
+        expect {
+          repository.create(title: "dummy 1")
+        }.to change {
+          JSON.parse(index_path.read, symbolize_names: true)
+        }.from(original_index).to(expected_index1)
+
+        expect {
+          repository.create(title: "dummy 2")
+        }.to change {
+          JSON.parse(index_path.read, symbolize_names: true)
+        }.from(expected_index1).to(expected_index2)
+      end
     end
 
-    it "updates index file" do
-      repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-      index_path = Pathname.pwd.join("index.json")
+    context "when a missing ID exists" do
+      it "creates todo file with the ID" do
+        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
 
-      original_index = {todos: {}, archived: {}, metadata: {lastId: 0, missingIds: []}}
-      expected_index1 = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
-      expect {
-        repository.create(title: "dummy 1")
-      }.to change {
-        JSON.parse(index_path.read, symbolize_names: true)
-      }.from(original_index).to(expected_index1)
+        index = {todos: {"": [2]}, archived: {}, metadata: {lastId: 2, missingIds: [1]}}
+        index_json = JSON.pretty_generate(index)
+        index_path = Pathname.pwd.join("index.json")
+        index_path.open("wb") { |file| file.puts(index_json) }
 
-      expected_index2 = {todos: {"": [1, 2]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
-      expect {
-        repository.create(title: "dummy 2")
-      }.to change {
-        JSON.parse(index_path.read, symbolize_names: true)
-      }.from(expected_index1).to(expected_index2)
+        todo_path = Pathname.pwd.join("1.md")
+        expect {
+          repository.create(title: "dummy")
+        }.to change { todo_path.exist? }.from(false).to(true)
+      end
+
+      it "removes the ID from missingIds" do
+        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+
+        index = {todos: {"": []}, archived: {}, metadata: {lastId: 2, missingIds: [1, 2]}}
+        index_json = JSON.pretty_generate(index)
+        index_path = Pathname.pwd.join("index.json")
+        index_path.open("wb") { |file| file.puts(index_json) }
+
+        expected_index = {todos: {"": [1]}, archived: {}, metadata: {lastId: 2, missingIds: [2]}}
+        expect {
+          repository.create(title: "dummy")
+        }.to change { JSON.parse(index_path.read, symbolize_names: true) }.from(index).to(expected_index)
+      end
     end
   end
 

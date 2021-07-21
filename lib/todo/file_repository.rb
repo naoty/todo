@@ -31,6 +31,8 @@ class Todo::FileRepository
   end
 
   def create(title:)
+    next_id = load_next_id
+
     todo = Todo::Todo.new(id: next_id, title: title, state: :undone, body: "")
     todo_path = root_path.join("#{todo.id}.md")
     encoded_todo = encode(todo)
@@ -39,7 +41,6 @@ class Todo::FileRepository
     index = load_index
     index[:todos][:""] ||= []
     index[:todos][:""] << todo.id
-    index[:metadata][:lastId] = todo.id
     save_index(index)
   end
 
@@ -89,10 +90,20 @@ class Todo::FileRepository
     archived_path.mkdir
   end
 
-  def next_id
+  def load_next_id
     index = load_index
-    last_id = index.dig(:metadata, :lastId) || 0
-    last_id + 1
+    missing_ids = index.dig(:metadata, :missingIds)
+
+    if missing_ids.empty?
+      last_id = index.dig(:metadata, :lastId) || 0
+      next_id = last_id + 1
+      index[:metadata][:lastId] = next_id
+    else
+      next_id = index[:metadata][:missingIds].shift
+    end
+
+    save_index(index)
+    next_id
   end
 
   def load_index
