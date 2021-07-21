@@ -3,6 +3,7 @@ class Todo::CLI
     Usage:
       todo list
       todo add <title>
+      todo delete <id>...
       todo -h | --help
       todo -v | --version
     
@@ -67,6 +68,8 @@ class Todo::CLI
       Todo::Add.new(arguments: arguments)
     when "list"
       Todo::List.new(arguments: arguments)
+    when "delete"
+      Todo::Delete.new(arguments: arguments)
     else
       raise CommandNotFound.new(unknown_name: name)
     end

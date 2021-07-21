@@ -61,7 +61,8 @@ RSpec.describe Todo::CLI do
 
     {
       "add" => Todo::Add,
-      "list" => Todo::List
+      "list" => Todo::List,
+      "delete" => Todo::Delete
     }.each do |command, klass|
       context "when arguments include '#{command}' command" do
         it "calls #{klass}#run" do
