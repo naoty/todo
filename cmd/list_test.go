@@ -16,10 +16,11 @@ func TestListRun(t *testing.T) {
 		output string
 	}{
 		{"empty", []*todo.Todo{}, ""},
-		{"undone_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Undone}}, "[ ] 001: dummy\n"},
-		{"done_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Done}}, "[x] 001: dummy\n"},
-		{"waiting_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Waiting}}, "[w] 001: dummy\n"},
-		{"subtodo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Undone, Todos: []*todo.Todo{{ID: 2, Title: "dummy", State: todo.Undone}}}}, "[ ] 001: dummy\n  [ ] 002: dummy\n"},
+		{"undone_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Undone}}, "  1 | dummy\n"},
+		{"done_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Done}}, "  1 | \033[2;9mdummy\033[0m\n"},
+		{"waiting_todo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Waiting}}, "  1 | \033[2mdummy\033[0m\n"},
+		{"right-aligned ID", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Undone}, {ID: 10, Title: "dummy", State: todo.Undone}}, "   1 | dummy\n  10 | dummy\n"},
+		{"subtodo", []*todo.Todo{{ID: 1, Title: "dummy", State: todo.Undone, Todos: []*todo.Todo{{ID: 2, Title: "dummy", State: todo.Undone}}}}, "  1 | dummy\n    2 | dummy\n"},
 	}
 
 	for _, testcase := range testcases {

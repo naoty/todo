@@ -27,28 +27,44 @@ func (c *List) Run(args []string) int {
 		return 1
 	}
 
+	maxWidth := 0
 	for _, td := range todos {
-		c.printTodos(td, 0)
+		idString := fmt.Sprintf("%d", td.ID)
+		if len(idString) > maxWidth {
+			maxWidth = len(idString)
+		}
+	}
+
+	for _, td := range todos {
+		c.printTodos(td, 0, maxWidth)
 	}
 
 	return 0
 }
 
-func (c *List) printTodos(td *todo.Todo, level int) {
-	var mark string
+func (c *List) printTodos(td *todo.Todo, level, width int) {
+	var decoratedTitle string
 	switch td.State {
 	case todo.Undone:
-		mark = "[ ]"
+		decoratedTitle = td.Title
 	case todo.Done:
-		mark = "[x]"
+		decoratedTitle = fmt.Sprintf("\033[2;9m%s\033[0m", td.Title)
 	case todo.Waiting:
-		mark = "[w]"
+		decoratedTitle = fmt.Sprintf("\033[2m%s\033[0m", td.Title)
 	}
 
-	indent := strings.Repeat(" ", level*2)
-	fmt.Fprintf(c.cli.Writer, "%s%s %03d: %s\n", indent, mark, td.ID, td.Title)
+	indent := strings.Repeat(" ", (level+1)*2)
+	fmt.Fprintf(c.cli.Writer, "%s%*d | %s\n", indent, width, td.ID, decoratedTitle)
+
+	maxWidth := 0
+	for _, td := range td.Todos {
+		idString := fmt.Sprintf("%d", td.ID)
+		if len(idString) > maxWidth {
+			maxWidth = len(idString)
+		}
+	}
 
 	for _, sub := range td.Todos {
-		c.printTodos(sub, level+1)
+		c.printTodos(sub, level+1, maxWidth)
 	}
 }
