@@ -21,7 +21,7 @@ func NewDelete(cli CLI, version string, repo repository.Repository) Command {
 // Run implements Command interface.
 func (c *Delete) Run(args []string) int {
 	if len(args) < 3 {
-		fmt.Fprintf(c.cli.ErrorWriter, usage())
+		fmt.Fprint(c.cli.ErrorWriter, usage())
 		return 1
 	}
 

@@ -27,7 +27,7 @@ func (c *Add) Run(args []string) int {
 	flagset.Parse(args)
 
 	if flagset.NArg() < 3 {
-		fmt.Fprintf(c.cli.ErrorWriter, usage())
+		fmt.Fprint(c.cli.ErrorWriter, usage())
 		return 1
 	}
 
