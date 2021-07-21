@@ -87,16 +87,44 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when todo file isn't broken" do
-      it "returns todos" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-        repository.create(title: "dummy 1")
-        repository.create(title: "dummy 2")
+      context "when no todos have subtudos" do
+        it "returns only todos" do
+          repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+          repository.create(title: "dummy 1")
+          repository.create(title: "dummy 2")
 
-        todos = repository.list
-        expect(todos).to contain_exactly(
-          an_instance_of(Todo::Todo).and(having_attributes(id: 1)),
-          an_instance_of(Todo::Todo).and(having_attributes(id: 2))
-        )
+          todos = repository.list
+          expect(todos).to contain_exactly(
+            an_instance_of(Todo::Todo).and(having_attributes(id: 1)),
+            an_instance_of(Todo::Todo).and(having_attributes(id: 2))
+          )
+        end
+      end
+
+      context "when a todo have subtudos" do
+        it "returns todos with subtodos" do
+          repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+          repository.create(title: "dummy 1")
+
+          # TODO: Use #create to create subtudos
+          repository.create(title: "dummy 2")
+          index_path = Pathname.pwd.join("index.json")
+          index = JSON.parse(index_path.read, symbolize_names: true)
+          index[:todos][:""] = [1]
+          index[:todos][:"1"] = [2]
+          index_json = JSON.pretty_generate(index)
+          index_path.open("wb") { |file| file.puts(index_json) }
+
+          todos = repository.list
+          expect(todos).to contain_exactly(
+            an_instance_of(Todo::Todo).and(having_attributes(
+              id: 1,
+              subtodos: a_collection_containing_exactly(
+                an_instance_of(Todo::Todo).and(having_attributes(id: 2))
+              )
+            ))
+          )
+        end
       end
     end
 

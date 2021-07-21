@@ -12,9 +12,9 @@ class Todo::FileRepository
     setup
   end
 
-  def list
+  def list(id: nil)
     index = load_index
-    todos = index[:todos][:""].map do |id|
+    todos = (index[:todos][id.to_s.to_sym] || []).map do |id|
       todo_path = root_path.join("#{id}.md")
 
       unless todo_path.exist?
@@ -23,8 +23,13 @@ class Todo::FileRepository
       end
 
       todo = decode(id: id, text: todo_path.read)
-      error_output.puts("todo file is broken: #{todo_path}") if todo.nil?
 
+      if todo.nil?
+        error_output.puts("todo file is broken: #{todo_path}")
+        return nil
+      end
+
+      todo.subtodos = list(id: todo.id)
       todo
     end
     todos.compact
