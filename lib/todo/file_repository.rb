@@ -43,6 +43,24 @@ class Todo::FileRepository
     save_index(index)
   end
 
+  def delete(ids:)
+    ids.each do |id|
+      todo_path = root_path.join("#{id}.md")
+
+      unless todo_path.exist?
+        error_output.puts("todo file is not found: #{todo_path}")
+        next
+      end
+
+      todo_path.delete
+
+      index = load_index
+      index[:todos][:""].delete(id)
+      index[:metadata][:missingIds] << id
+      save_index(index)
+    end
+  end
+
   private
 
   def setup

@@ -197,4 +197,51 @@ RSpec.describe Todo::FileRepository do
       }.from(expected_index1).to(expected_index2)
     end
   end
+
+  describe "#delete" do
+    around do |example|
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          example.run
+        end
+      end
+    end
+
+    context "when todo file with given ID doesn't exist" do
+      it "outputs message to error output" do
+        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+        repository.delete(ids: [100])
+
+        todo_path = Pathname.pwd.join("100.md")
+        expect(error_output.string).to eq("todo file is not found: #{todo_path}\n")
+      end
+    end
+
+    context "when todo file with given ID exists" do
+      before do
+        repository.create(title: "dummy")
+      end
+
+      let(:repository) do
+        Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+      end
+
+      it "deletes the todo file" do
+        todo_path = Pathname.pwd.join("1.md")
+        expect { repository.delete(ids: [1]) }.to change { todo_path.exist? }.from(true).to(false)
+      end
+
+      it "updates index file" do
+        index_path = Pathname.pwd.join("index.json")
+        before_index = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
+        after_index = {todos: {"": []}, archived: {}, metadata: {lastId: 1, missingIds: [1]}}
+
+        expect {
+          repository.delete(ids: [1])
+        }.to change {
+          JSON.parse(index_path.read, symbolize_names: true)
+        }.from(before_index).to(after_index)
+      end
+    end
+  end
 end

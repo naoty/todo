@@ -27,6 +27,6 @@ class Todo::Delete
       return
     end
 
-    raise NotImplementedError
+    repository.delete(ids: arguments.map(&:to_i))
   end
 end

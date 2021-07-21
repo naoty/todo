@@ -34,5 +34,13 @@ RSpec.describe Todo::Delete do
         end
       end
     end
+
+    context "when arguments include IDs" do
+      it "calls Todo::FileRepository#delete" do
+        delete = Todo::Delete.new(arguments: ["1"], output: output, error_output: error_output)
+        expect(repository).to receive(:delete).with(ids: [1])
+        delete.run(repository: repository)
+      end
+    end
   end
 end
