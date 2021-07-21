@@ -23,17 +23,22 @@ class Todo::List
     end
 
     todos = repository.list
-    id_width = todos.map { |todo| todo.id.digits.length }.max
-
-    todos.each do |todo|
-      output.puts(format_todo(todo, id_width: id_width))
-    end
+    puts_todos(todos, indent_width: 2)
   end
 
   private
 
-  def format_todo(todo, id_width:)
-    indent = " " * 2
+  def puts_todos(todos, indent_width:)
+    indent = " " * indent_width
+    id_width = todos.map { |todo| todo.id.digits.length }.max
+
+    todos.each do |todo|
+      output.puts(format_todo(todo, indent: indent, id_width: id_width))
+      puts_todos(todo.subtodos, indent_width: indent_width + id_width + 3) # " | " is 3 chars
+    end
+  end
+
+  def format_todo(todo, indent:, id_width:)
     right_aligned_id = todo.id.to_s.rjust(id_width, " ")
     decorated_title =
       case todo.state
