@@ -2,7 +2,7 @@ class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list
-      todo add <title>
+      todo add (-p | --parent <id>) <title>
       todo delete <id>...
       todo -h | --help
       todo -v | --version
