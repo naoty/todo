@@ -8,19 +8,20 @@ require "tmpdir"
 RSpec.describe Todo::FileRepository do
   let(:output) { StringIO.new }
   let(:error_output) { StringIO.new }
+  let(:archived_path) { Pathname.pwd.join("archived") }
+  let(:index_path) { Pathname.pwd.join("index.json") }
 
-  describe "#initialize" do
-    around do |example|
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-          example.run
-        end
+  around do |example|
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        example.run
       end
     end
+  end
 
+  describe "#initialize" do
     context "when index file doesn't exist" do
       it "creates index file" do
-        index_path = Pathname.pwd.join("index.json")
         expect {
           Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
         }.to change { index_path.exist? }.from(false).to(true)
@@ -38,18 +39,24 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when index file exists" do
-      it "doesn't overwrite" do
-        index_json = JSON.pretty_generate({
-          todos: {"": [1]},
+      let(:index_json) do
+        JSON.pretty_generate({
+          todos: {
+            "": [1]
+          },
           archived: {},
           metadata: {
             lastId: 1,
             missingIds: []
           }
         })
-        index_path = Pathname.pwd.join("index.json")
-        index_path.open("wb") { |file| file.puts(index_json) }
+      end
 
+      before do
+        index_path.open("wb") { |file| file.puts(index_json) }
+      end
+
+      it "doesn't overwrite" do
         Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
         expect(index_path.read.chomp).to eq(index_json)
       end
@@ -57,7 +64,6 @@ RSpec.describe Todo::FileRepository do
 
     context "when archived directory doesn't exist" do
       it "creates archived directory" do
-        archived_path = Pathname.pwd.join("archived")
         expect {
           Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
         }.to change { archived_path.exist? }.from(false).to(true)
@@ -66,10 +72,11 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when archived directory exists" do
-      it "doesn't raise any errors" do
-        archived_path = Pathname.pwd.join("archived")
+      before do
         archived_path.mkdir
+      end
 
+      it "doesn't raise any errors" do
         expect {
           Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
         }.not_to raise_error
@@ -78,21 +85,18 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#list" do
-    around do |example|
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-          example.run
-        end
-      end
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
     context "when todo file isn't broken" do
       context "when no todos have subtudos" do
-        it "returns only todos" do
-          repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+        before do
           repository.create(title: "dummy 1")
           repository.create(title: "dummy 2")
+        end
 
+        it "returns only todos" do
           todos = repository.list
           expect(todos).to contain_exactly(
             an_instance_of(Todo::Todo).and(having_attributes(id: 1)),
@@ -102,19 +106,19 @@ RSpec.describe Todo::FileRepository do
       end
 
       context "when a todo have subtudos" do
-        it "returns todos with subtodos" do
-          repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+        before do
           repository.create(title: "dummy 1")
 
           # TODO: Use #create to create subtudos
           repository.create(title: "dummy 2")
-          index_path = Pathname.pwd.join("index.json")
           index = JSON.parse(index_path.read, symbolize_names: true)
           index[:todos][:""] = [1]
           index[:todos][:"1"] = [2]
           index_json = JSON.pretty_generate(index)
           index_path.open("wb") { |file| file.puts(index_json) }
+        end
 
+        it "returns todos with subtodos" do
           todos = repository.list
           expect(todos).to contain_exactly(
             an_instance_of(Todo::Todo).and(having_attributes(
@@ -129,15 +133,15 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when index file include ID but the todo file is not found" do
-      it "puts warning message to error output" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-        index_path = Pathname.pwd.join("index.json")
+      before do
         index = JSON.parse(index_path.read, symbolize_names: true)
         index[:todos][:""] = [1]
         index[:metadata][:lastId] = 1
         index_json = JSON.pretty_generate(index)
         index_path.open("wb") { |file| file.puts(index_json) }
+      end
 
+      it "puts warning message to error output" do
         repository.list
         todo_path = Pathname.pwd.join("1.md")
         expect(error_output.string).to eq("todo file is not found: #{todo_path}\n")
@@ -145,22 +149,28 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when todo file is broken" do
-      it "puts warning message to error output" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-        repository.create(title: "dummy")
-        todo_path = Pathname.pwd.join("1.md")
-        todo_path.open("wb+") { |file| file.puts("") }
+      let(:todo_path) do
+        Pathname.pwd.join("1.md")
+      end
 
+      before do
+        repository.create(title: "dummy")
+        todo_path.open("wb+") { |file| file.puts("") }
+      end
+
+      it "puts warning message to error output" do
         repository.list
         expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
       end
     end
 
     context "when front matter of todo file is broken" do
-      it "puts warning message to error output" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+      let(:todo_path) do
+        Pathname.pwd.join("1.md")
+      end
+
+      before do
         repository.create(title: "dummy")
-        todo_path = Pathname.pwd.join("1.md")
         todo_path.open("wb+") do |file|
           file.puts(<<~TEXT)
             ---
@@ -171,7 +181,9 @@ RSpec.describe Todo::FileRepository do
             body
           TEXT
         end
+      end
 
+      it "puts warning message to error output" do
         repository.list
         expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
       end
@@ -179,18 +191,12 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#create" do
-    around do |example|
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-          example.run
-        end
-      end
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
     context "when missing IDs are empty" do
       it "creates a file" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-
         todo1_path = Pathname.pwd.join("1.md")
         expect { repository.create(title: "dummy 1") }.to change { todo1_path.exist? }.from(false).to(true)
         expect(todo1_path.read).to eq(<<~TEXT)
@@ -207,9 +213,6 @@ RSpec.describe Todo::FileRepository do
       end
 
       it "updates index file" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-        index_path = Pathname.pwd.join("index.json")
-
         original_index = {todos: {}, archived: {}, metadata: {lastId: 0, missingIds: []}}
         expected_index1 = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
         expected_index2 = {todos: {"": [1, 2]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
@@ -229,14 +232,16 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when a missing ID exists" do
-      it "creates todo file with the ID" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+      let(:index) do
+        {todos: {"": [2]}, archived: {}, metadata: {lastId: 2, missingIds: [1]}}
+      end
 
-        index = {todos: {"": [2]}, archived: {}, metadata: {lastId: 2, missingIds: [1]}}
+      before do
         index_json = JSON.pretty_generate(index)
-        index_path = Pathname.pwd.join("index.json")
         index_path.open("wb") { |file| file.puts(index_json) }
+      end
 
+      it "creates todo file with the ID" do
         todo_path = Pathname.pwd.join("1.md")
         expect {
           repository.create(title: "dummy")
@@ -244,14 +249,7 @@ RSpec.describe Todo::FileRepository do
       end
 
       it "removes the ID from missingIds" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-
-        index = {todos: {"": []}, archived: {}, metadata: {lastId: 2, missingIds: [1, 2]}}
-        index_json = JSON.pretty_generate(index)
-        index_path = Pathname.pwd.join("index.json")
-        index_path.open("wb") { |file| file.puts(index_json) }
-
-        expected_index = {todos: {"": [1]}, archived: {}, metadata: {lastId: 2, missingIds: [2]}}
+        expected_index = {todos: {"": [2, 1]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
         expect {
           repository.create(title: "dummy")
         }.to change { JSON.parse(index_path.read, symbolize_names: true) }.from(index).to(expected_index)
@@ -260,20 +258,17 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#delete" do
-    around do |example|
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-          example.run
-        end
-      end
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
     context "when todo file with given ID doesn't exist" do
-      it "outputs message to error output" do
-        repository = Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-        repository.delete(ids: [100])
+      let(:ids) { [100] }
 
-        todo_path = Pathname.pwd.join("100.md")
+      it "outputs message to error output" do
+        repository.delete(ids: ids)
+
+        todo_path = Pathname.pwd.join("#{ids.first}.md")
         expect(error_output.string).to eq("todo file is not found: #{todo_path}\n")
       end
     end
@@ -283,17 +278,12 @@ RSpec.describe Todo::FileRepository do
         repository.create(title: "dummy")
       end
 
-      let(:repository) do
-        Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-      end
-
       it "deletes the todo file" do
         todo_path = Pathname.pwd.join("1.md")
         expect { repository.delete(ids: [1]) }.to change { todo_path.exist? }.from(true).to(false)
       end
 
       it "updates index file" do
-        index_path = Pathname.pwd.join("index.json")
         before_index = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
         after_index = {todos: {"": []}, archived: {}, metadata: {lastId: 1, missingIds: [1]}}
 
