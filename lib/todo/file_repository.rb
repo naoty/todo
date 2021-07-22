@@ -19,14 +19,14 @@ class Todo::FileRepository
 
       unless todo_path.exist?
         error_output.puts("todo file is not found: #{todo_path}")
-        return nil
+        next nil
       end
 
       todo = decode(id: id, text: todo_path.read)
 
       if todo.nil?
         error_output.puts("todo file is broken: #{todo_path}")
-        return nil
+        next nil
       end
 
       todo.subtodos = list(id: todo.id)
@@ -78,14 +78,7 @@ class Todo::FileRepository
     index_path = root_path.join("index.json")
     return if index_path.exist?
 
-    save_index({
-      todos: {},
-      archived: {},
-      metadata: {
-        lastId: 0,
-        missingIds: []
-      }
-    })
+    save_index(default_index)
   end
 
   def create_archived_directory_if_not_exist
@@ -111,8 +104,25 @@ class Todo::FileRepository
     next_id
   end
 
+  def default_index
+    {
+      todos: {},
+      archived: {},
+      metadata: {
+        lastId: 0,
+        missingIds: []
+      }
+    }
+  end
+
   def load_index
-    JSON.parse(root_path.join("index.json").read, symbolize_names: true)
+    @loaded_index ||= begin
+      index_path = root_path.join("index.json")
+      JSON.parse(index_path.read, symbolize_names: true)
+    rescue JSON::ParserError
+      error_output.puts("index file is broken: #{index_path}")
+      default_index
+    end
   end
 
   def save_index(index)
