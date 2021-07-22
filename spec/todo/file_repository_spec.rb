@@ -1,5 +1,6 @@
 require "spec_helper"
 
+require "fileutils"
 require "json"
 require "pathname"
 require "stringio"
@@ -89,88 +90,47 @@ RSpec.describe Todo::FileRepository do
       Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
-    context "when todo file isn't broken" do
-      context "when no todos have subtudos" do
-        before do
-          repository.create(title: "dummy 1")
-          repository.create(title: "dummy 2")
-        end
+    let(:todo_id) { 1 }
+    let(:todo_path) { Pathname.pwd.join("#{todo_id}.md") }
+    let(:subtodo_id) { 2 }
+    let(:subtodo_path) { Pathname.pwd.join("#{subtodo_id}.md") }
+    let(:not_found_todo_id) { 100 }
 
-        it "returns only todos" do
-          todos = repository.list
-          expect(todos).to contain_exactly(
-            an_instance_of(Todo::Todo).and(having_attributes(id: 1)),
-            an_instance_of(Todo::Todo).and(having_attributes(id: 2))
-          )
-        end
+    shared_context "when a todo file exists" do
+      before do
+        FileUtils.touch(todo_path)
       end
+    end
 
-      context "when a todo have subtudos" do
-        before do
-          repository.create(title: "dummy 1")
+    shared_context "when a todo file is normal" do
+      before do
+        todo_path.open("wb+") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: undone
+            ---
 
-          # TODO: Use #create to create subtudos
-          repository.create(title: "dummy 2")
-          index = JSON.parse(index_path.read, symbolize_names: true)
-          index[:todos][:""] = [1]
-          index[:todos][:"1"] = [2]
-          index_json = JSON.pretty_generate(index)
-          index_path.open("wb") { |file| file.puts(index_json) }
-        end
-
-        it "returns todos with subtodos" do
-          todos = repository.list
-          expect(todos).to contain_exactly(
-            an_instance_of(Todo::Todo).and(having_attributes(
-              id: 1,
-              subtodos: a_collection_containing_exactly(
-                an_instance_of(Todo::Todo).and(having_attributes(id: 2))
-              )
-            ))
-          )
+            body
+          TEXT
         end
       end
     end
 
-    context "when index file include ID but the todo file is not found" do
+    shared_context "when a todo file is empty" do
       before do
-        index = JSON.parse(index_path.read, symbolize_names: true)
-        index[:todos][:""] = [1]
-        index[:metadata][:lastId] = 1
-        index_json = JSON.pretty_generate(index)
-        index_path.open("wb") { |file| file.puts(index_json) }
-      end
-
-      it "puts warning message to error output" do
-        repository.list
-        todo_path = Pathname.pwd.join("1.md")
-        expect(error_output.string).to eq("todo file is not found: #{todo_path}\n")
+        todo_path.truncate(0)
       end
     end
 
-    context "when todo file is broken" do
-      let(:todo_path) do
-        Pathname.pwd.join("1.md")
-      end
-
+    shared_context "when a todo file doesn't include front matter" do
       before do
-        repository.create(title: "dummy")
-        todo_path.open("wb+") { |file| file.puts("") }
-      end
-
-      it "puts warning message to error output" do
-        repository.list
-        expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
+        todo_path.open("wb+") { |file| file.puts("body") }
       end
     end
 
-    context "when front matter of todo file is broken" do
-      let(:todo_path) do
-        Pathname.pwd.join("1.md")
-      end
-
+    shared_context "when a todo file includes broken front matter" do
       before do
-        repository.create(title: "dummy")
         todo_path.open("wb+") do |file|
           file.puts(<<~TEXT)
             ---
@@ -182,10 +142,190 @@ RSpec.describe Todo::FileRepository do
           TEXT
         end
       end
+    end
 
-      it "puts warning message to error output" do
+    shared_context "when an index file is normal" do
+      before do
+        index_path.open("wb+") do |file|
+          file.puts(JSON.pretty_generate({
+            todos: {
+              "": [todo_id]
+            },
+            archived: {},
+            metadata: {
+              lastId: todo_id,
+              missingIds: []
+            }
+          }))
+        end
+      end
+    end
+
+    shared_context "when an index file is empty" do
+      before do
+        index_path.truncate(0)
+      end
+    end
+
+    shared_context "when an index file includes ID which todo file doesn't exist" do
+      before do
+        index_path.open("wb+") do |file|
+          file.puts(JSON.pretty_generate({
+            todos: {
+              "": [not_found_todo_id]
+            },
+            archived: {},
+            metadata: {
+              lastId: not_found_todo_id,
+              missingIds: []
+            }
+          }))
+        end
+      end
+    end
+
+    shared_context "when a todo has a subtodo" do
+      before do
+        subtodo_path.open("wb+") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: undone
+            ---
+
+            body
+          TEXT
+        end
+
+        index_path.open("wb+") do |file|
+          file.puts(JSON.pretty_generate({
+            todos: {
+              "": [todo_id],
+              "#{todo_id}": [subtodo_id]
+            },
+            archived: {},
+            metadata: {
+              lastId: subtodo_id,
+              missingIds: []
+            }
+          }))
+        end
+      end
+    end
+
+    context "when todo doesn't exist" do
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+    end
+
+    context "when a todo exists but the todo file is empty" do
+      include_context "when a todo file exists"
+      include_context "when a todo file is empty"
+      include_context "when an index file is normal"
+
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+
+      it "puts message to error output" do
         repository.list
         expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
+      end
+    end
+
+    context "when a todo exists but the todo file doesn't include front matter" do
+      include_context "when a todo file exists"
+      include_context "when a todo file doesn't include front matter"
+      include_context "when an index file is normal"
+
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+
+      it "puts message to error output" do
+        repository.list
+        expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
+      end
+    end
+
+    context "when a todo exists but the todo file includes broken front matter" do
+      include_context "when a todo file exists"
+      include_context "when a todo file includes broken front matter"
+      include_context "when an index file is normal"
+
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+
+      it "puts message to error output" do
+        repository.list
+        expect(error_output.string).to eq("todo file is broken: #{todo_path}\n")
+      end
+    end
+
+    context "when a todo exists but an index file is empty" do
+      include_context "when a todo file exists"
+      include_context "when a todo file is normal"
+      include_context "when an index file is empty"
+
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+
+      it "puts message to error output" do
+        repository.list
+        expect(error_output.string).to eq("index file is broken: #{index_path}\n")
+      end
+    end
+
+    context "when a todo exists but an index file includes ID which todo file doesn't exist" do
+      include_context "when a todo file exists"
+      include_context "when a todo file is normal"
+      include_context "when an index file includes ID which todo file doesn't exist"
+
+      it "returns empty array" do
+        expect(repository.list).to be_empty
+      end
+
+      it "puts message to error output" do
+        repository.list
+        not_found_todo_path = Pathname.pwd.join("#{not_found_todo_id}.md")
+        expect(error_output.string).to eq("todo file is not found: #{not_found_todo_path}\n")
+      end
+    end
+
+    context "when a todo file and an index file is normal" do
+      include_context "when a todo file exists"
+      include_context "when a todo file is normal"
+      include_context "when an index file is normal"
+
+      it "returns array containing a todo" do
+        expect(repository.list).to contain_exactly(
+          an_instance_of(Todo::Todo).and(having_attributes(
+            id: todo_id
+          ))
+        )
+      end
+    end
+
+    context "when a todo has a subtodo" do
+      include_context "when a todo file exists"
+      include_context "when a todo file is normal"
+      include_context "when an index file is normal"
+      include_context "when a todo has a subtodo"
+
+      it "returns array containing a todo with a subtodo" do
+        expect(repository.list).to contain_exactly(
+          an_instance_of(Todo::Todo).and(having_attributes(
+            id: todo_id,
+            subtodos: a_collection_containing_exactly(
+              an_instance_of(Todo::Todo).and(having_attributes(
+                id: subtodo_id
+              ))
+            )
+          ))
+        )
       end
     end
   end
