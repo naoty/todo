@@ -335,64 +335,150 @@ RSpec.describe Todo::FileRepository do
       Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
-    context "when missing IDs are empty" do
-      it "creates a file" do
-        todo1_path = Pathname.pwd.join("1.md")
-        expect { repository.create(title: "dummy 1") }.to change { todo1_path.exist? }.from(false).to(true)
-        expect(todo1_path.read).to eq(<<~TEXT)
+    shared_context "when missing IDs are empty" do
+      before do
+        index_json = JSON.pretty_generate({
+          todos: {},
+          archived: {},
+          metadata: {
+            lastId: 0,
+            missingIds: []
+          }
+        })
+        index_path.open("wb") { |file| file.puts(index_json) }
+      end
+    end
+
+    shared_context "when missing IDs are present" do
+      let(:missing_id) { 1 }
+
+      before do
+        index_json = JSON.pretty_generate({
+          todos: {},
+          archived: {},
+          metadata: {
+            lastId: 2,
+            missingIds: [missing_id]
+          }
+        })
+        index_path.open("wb") { |file| file.puts(index_json) }
+      end
+    end
+
+    shared_context "when parent_id is given" do
+      let!(:parent_id) do
+        parent = repository.create(title: "dummy")
+        parent.id
+      end
+    end
+
+    shared_context "when parent_id isn't given" do
+      let(:parent_id) { nil }
+    end
+
+    context "when missing IDs are empty and parent_id isn't given" do
+      include_context "when missing IDs are empty"
+      include_context "when parent_id isn't given"
+
+      it "creates a todo file" do
+        todo_path = Pathname.pwd.join("1.md")
+        expect {
+          repository.create(title: "dummy", parent_id: parent_id)
+        }.to change { todo_path.exist? }.from(false).to(true)
+
+        expect(todo_path.read).to eq(<<~TEXT)
           ---
-          title: dummy 1
+          title: dummy
           state: undone
           ---
 
 
         TEXT
-
-        todo2_path = Pathname.pwd.join("2.md")
-        expect { repository.create(title: "dummy 2") }.to change { todo2_path.exist? }.from(false).to(true)
       end
 
-      it "updates index file" do
-        original_index = {todos: {}, archived: {}, metadata: {lastId: 0, missingIds: []}}
-        expected_index1 = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
-        expected_index2 = {todos: {"": [1, 2]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
-
+      it "updates an index file" do
         expect {
-          repository.create(title: "dummy 1")
+          repository.create(title: "dummy", parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
-        }.from(original_index).to(expected_index1)
-
-        expect {
-          repository.create(title: "dummy 2")
-        }.to change {
-          JSON.parse(index_path.read, symbolize_names: true)
-        }.from(expected_index1).to(expected_index2)
+        }.to({
+          todos: {
+            "": [1]
+          },
+          archived: {},
+          metadata: {
+            lastId: 1,
+            missingIds: []
+          }
+        })
       end
     end
 
-    context "when a missing ID exists" do
-      let(:index) do
-        {todos: {"": [2]}, archived: {}, metadata: {lastId: 2, missingIds: [1]}}
-      end
+    context "when missing IDs are empty and parent_id is given" do
+      include_context "when missing IDs are empty"
+      include_context "when parent_id is given"
 
-      before do
-        index_json = JSON.pretty_generate(index)
-        index_path.open("wb") { |file| file.puts(index_json) }
-      end
-
-      it "creates todo file with the ID" do
-        todo_path = Pathname.pwd.join("1.md")
+      it "creates a todo file" do
+        todo_path = Pathname.pwd.join("2.md")
         expect {
-          repository.create(title: "dummy")
+          repository.create(title: "dummy", parent_id: parent_id)
+        }.to change { todo_path.exist? }.from(false).to(true)
+
+        expect(todo_path.read).to eq(<<~TEXT)
+          ---
+          title: dummy
+          state: undone
+          ---
+
+
+        TEXT
+      end
+
+      it "updates an index file" do
+        expect {
+          repository.create(title: "dummy", parent_id: parent_id)
+        }.to change {
+          JSON.parse(index_path.read, symbolize_names: true)
+        }.to({
+          todos: {
+            "": [1],
+            "1": [2]
+          },
+          archived: {},
+          metadata: {
+            lastId: 2,
+            missingIds: []
+          }
+        })
+      end
+    end
+
+    context "when missing IDs are present and parent_id isn't given" do
+      include_context "when missing IDs are present"
+      include_context "when parent_id isn't given"
+
+      it "creates a todo file with a missing ID" do
+        todo_path = Pathname.pwd.join("#{missing_id}.md")
+        expect {
+          repository.create(title: "dummy", parent_id: parent_id)
         }.to change { todo_path.exist? }.from(false).to(true)
       end
 
-      it "removes the ID from missingIds" do
-        expected_index = {todos: {"": [2, 1]}, archived: {}, metadata: {lastId: 2, missingIds: []}}
+      it "removes a missing ID" do
         expect {
-          repository.create(title: "dummy")
-        }.to change { JSON.parse(index_path.read, symbolize_names: true) }.from(index).to(expected_index)
+          repository.create(title: "dummy", parent_id: parent_id)
+        }.to change {
+          JSON.parse(index_path.read, symbolize_names: true)
+        }.to({
+          todos: {
+            "": [missing_id]
+          },
+          archived: {},
+          metadata: {
+            lastId: 2,
+            missingIds: []
+          }
+        })
       end
     end
   end
