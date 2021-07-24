@@ -52,7 +52,17 @@ class Todo::FileRepository
   end
 
   def delete(ids:)
+    index = load_index
+
+    ids_to_be_deleted = ids.dup
     ids.each do |id|
+      subtodo_ids = index[:todos][id.to_s.to_sym]
+      next if subtodo_ids.nil?
+
+      ids_to_be_deleted -= subtodo_ids
+    end
+
+    ids_to_be_deleted.each do |id|
       todo_path = root_path.join("#{id}.md")
 
       unless todo_path.exist?
@@ -62,11 +72,20 @@ class Todo::FileRepository
 
       todo_path.delete
 
-      index = load_index
-      index[:todos][:""].delete(id)
-      index[:metadata][:missingIds] << id
-      save_index(index)
+      index[:todos].each do |parent_id, subtodo_ids|
+        if parent_id.to_s.to_i == id
+          delete(ids: subtodo_ids)
+          index[:todos].delete(id.to_s.to_sym)
+        end
+
+        if subtodo_ids.include?(id)
+          index[:todos][parent_id].delete(id)
+          index[:metadata][:missingIds] << id
+        end
+      end
     end
+
+    save_index(index)
   end
 
   private

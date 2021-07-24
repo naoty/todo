@@ -488,6 +488,10 @@ RSpec.describe Todo::FileRepository do
       Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
+    let!(:todo) { repository.create(title: "dummy") }
+    let!(:subtodo) { repository.create(title: "dummy", parent_id: todo.id) }
+    let!(:subsubtodo) { repository.create(title: "dummy", parent_id: subtodo.id) }
+
     context "when todo file with given ID doesn't exist" do
       let(:ids) { [100] }
 
@@ -499,25 +503,37 @@ RSpec.describe Todo::FileRepository do
       end
     end
 
-    context "when todo file with given ID exists" do
-      before do
-        repository.create(title: "dummy")
-      end
+    context "when given ID is a parent todo's ID" do
+      let(:ids) { [todo.id] }
 
-      it "deletes the todo file" do
-        todo_path = Pathname.pwd.join("1.md")
-        expect { repository.delete(ids: [1]) }.to change { todo_path.exist? }.from(true).to(false)
+      it "deletes all descendant todo files" do
+        todo_path = Pathname.pwd.join("#{todo.id}.md")
+        subtodo_path = Pathname.pwd.join("#{subtodo.id}.md")
+        subsubtodo_path = Pathname.pwd.join("#{subsubtodo.id}.md")
+
+        expect { repository.delete(ids: ids) }.to change { todo_path.exist? }.from(true).to(false)
+          .and change { subtodo_path.exist? }.from(true).to(false)
+          .and change { subsubtodo_path.exist? }.from(true).to(false)
       end
 
       it "updates index file" do
-        before_index = {todos: {"": [1]}, archived: {}, metadata: {lastId: 1, missingIds: []}}
-        after_index = {todos: {"": []}, archived: {}, metadata: {lastId: 1, missingIds: [1]}}
+        before_index = {todos: {"": [todo.id], "#{todo.id}": [subtodo.id], "#{subtodo.id}": [subsubtodo.id]}, archived: {}, metadata: {lastId: subsubtodo.id, missingIds: []}}
+        after_index = {todos: {"": []}, archived: {}, metadata: {lastId: subsubtodo.id, missingIds: [todo.id, subtodo.id, subsubtodo.id]}}
 
         expect {
-          repository.delete(ids: [1])
+          repository.delete(ids: ids)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.from(before_index).to(after_index)
+      end
+    end
+
+    context "when given IDs include a parent todo's ID and subtodo's ID" do
+      let(:ids) { [todo.id, subtodo.id] }
+
+      it "doesn't puts any messages to error output" do
+        repository.delete(ids: ids)
+        expect(error_output.string).to eq("")
       end
     end
   end
