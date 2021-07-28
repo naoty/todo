@@ -88,6 +88,37 @@ class Todo::FileRepository
     save_index(index)
   end
 
+  def update(ids:, state:)
+    index = load_index
+
+    ids_to_be_updated = ids.dup
+    ids.each do |id|
+      subtodo_ids = index[:todos][id.to_s.to_sym]
+      next if subtodo_ids.nil?
+
+      ids_to_be_updated -= subtodo_ids
+    end
+
+    ids_to_be_updated.each do |id|
+      todo_path = root_path.join("#{id}.md")
+
+      unless todo_path.exist?
+        error_output.puts("todo file is not found: #{todo_path}")
+        next
+      end
+
+      todo = decode(id: id, text: todo_path.read)
+      todo.state = state
+      encoded_todo = encode(todo)
+      todo_path.open("wb") { |file| file.puts(encoded_todo) }
+
+      subtodo_ids = index[:todos][id.to_s.to_sym]
+      next if subtodo_ids.nil?
+
+      update(ids: subtodo_ids, state: state)
+    end
+  end
+
   private
 
   def setup

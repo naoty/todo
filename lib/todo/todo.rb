@@ -1,6 +1,6 @@
 class Todo::Todo
-  attr_accessor :subtodos
-  attr_reader :id, :title, :state, :body
+  attr_accessor :state, :subtodos
+  attr_reader :id, :title, :body
 
   def initialize(id:, title:, state: :undone, body: "", subtodos: [])
     @id = id

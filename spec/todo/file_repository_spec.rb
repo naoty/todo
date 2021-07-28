@@ -531,9 +531,53 @@ RSpec.describe Todo::FileRepository do
     context "when given IDs include a parent todo's ID and subtodo's ID" do
       let(:ids) { [todo.id, subtodo.id] }
 
-      it "doesn't puts any messages to error output" do
+      it "doesn't put any messages to error output" do
         repository.delete(ids: ids)
-        expect(error_output.string).to eq("")
+        expect(error_output.string).to be_empty
+      end
+    end
+  end
+
+  describe "#update" do
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+    end
+
+    let!(:todo) { repository.create(title: "dummy") }
+    let!(:subtodo) { repository.create(title: "dummy", parent_id: todo.id) }
+    let!(:subsubtodo) { repository.create(title: "dummy", parent_id: subtodo.id) }
+
+    context "when todo file with given ID doesn't exist" do
+      let(:ids) { [100] }
+
+      it "puts error message to error output" do
+        repository.update(ids: ids, state: :undone)
+
+        todo_path = Pathname.pwd.join("#{ids.first}.md")
+        expect(error_output.string).to eq("todo file is not found: #{todo_path}\n")
+      end
+    end
+
+    context "when given ID is a parent todo's ID" do
+      let(:ids) { [todo.id] }
+
+      it "updates all descendant todos" do
+        todo_path = Pathname.pwd.join("#{todo.id}.md")
+        subtodo_path = Pathname.pwd.join("#{subtodo.id}.md")
+        subsubtodo_path = Pathname.pwd.join("#{subsubtodo.id}.md")
+
+        expect { repository.update(ids: ids, state: :done) }.to change { todo_path.read.include?("state: done") }.to(true)
+          .and change { subtodo_path.read.include?("state: done") }.to(true)
+          .and change { subsubtodo_path.read.include?("state: done") }.to(true)
+      end
+    end
+
+    context "when given IDs include a parent todo's ID and subtodo's ID" do
+      let(:ids) { [todo.id, subtodo.id] }
+
+      it "doesn't put any messages to error output" do
+        repository.update(ids: ids, state: :done)
+        expect(error_output.string).to be_empty
       end
     end
   end
