@@ -4,6 +4,9 @@ class Todo::CLI
       todo list
       todo add (-p | --parent <id>) <title>
       todo delete <id>...
+      todo done <id>...
+      todo undone <id>...
+      todo wait <id>...
       todo -h | --help
       todo -v | --version
     
@@ -70,6 +73,12 @@ class Todo::CLI
       Todo::List.new(arguments: arguments)
     when "delete"
       Todo::Delete.new(arguments: arguments)
+    when "done"
+      Todo::Update.new(arguments: arguments, state: :done)
+    when "undone"
+      Todo::Update.new(arguments: arguments, state: :undone)
+    when "wait"
+      Todo::Update.new(arguments: arguments, state: :waiting, name: "wait")
     else
       raise CommandNotFound.new(unknown_name: name)
     end

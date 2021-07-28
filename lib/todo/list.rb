@@ -2,7 +2,7 @@ class Todo::List
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list
-      todo -h | --help
+      todo list -h | --help
     
     Options:
       -h --help  Show this message

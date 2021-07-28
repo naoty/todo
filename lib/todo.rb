@@ -7,4 +7,5 @@ module Todo
   autoload :FileRepository, "todo/file_repository"
   autoload :List, "todo/list"
   autoload :Todo, "todo/todo"
+  autoload :Update, "todo/update"
 end
