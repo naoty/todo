@@ -699,6 +699,10 @@ RSpec.describe Todo::FileRepository do
           .to not_change { todo_path.exist? }
           .and not_change { subtodo_path.exist? }
       end
+
+      it "doesn't update index file" do
+        expect { repository.archive }.not_to change { JSON.parse(index_path.read, symbolize_names: true) }
+      end
     end
 
     context "when parent todo is done but subtodo is undone" do
@@ -713,6 +717,20 @@ RSpec.describe Todo::FileRepository do
           .and change { subtodo_path.exist? }.to(false)
           .and change { archived_subtodo_path.exist? }.to(true)
       end
+
+      it "updates index file" do
+        expect { repository.archive }.to change { JSON.parse(index_path.read, symbolize_names: true) }.to({
+          todos: {},
+          archived: {
+            "": [todo_id],
+            "#{todo_id}": [subtodo_id]
+          },
+          metadata: {
+            lastId: subtodo_id,
+            missingIds: []
+          }
+        })
+      end
     end
 
     context "when parent todo is undone but subtodo is done" do
@@ -725,6 +743,21 @@ RSpec.describe Todo::FileRepository do
           .to not_change { todo_path.exist? }
           .and change { subtodo_path.exist? }.to(false)
           .and change { archived_subtodo_path.exist? }.to(true)
+      end
+
+      it "updates index file" do
+        expect { repository.archive }.to change { JSON.parse(index_path.read, symbolize_names: true) }.to({
+          todos: {
+            "": [todo_id]
+          },
+          archived: {
+            "#{todo_id}": [subtodo_id]
+          },
+          metadata: {
+            lastId: subtodo_id,
+            missingIds: []
+          }
+        })
       end
     end
 
@@ -739,6 +772,20 @@ RSpec.describe Todo::FileRepository do
           .and change { archived_todo_path.exist? }.to(true)
           .and change { subtodo_path.exist? }.to(false)
           .and change { archived_subtodo_path.exist? }.to(true)
+      end
+
+      it "updates index file" do
+        expect { repository.archive }.to change { JSON.parse(index_path.read, symbolize_names: true) }.to({
+          todos: {},
+          archived: {
+            "": [todo_id],
+            "#{todo_id}": [subtodo_id]
+          },
+          metadata: {
+            lastId: subtodo_id,
+            missingIds: []
+          }
+        })
       end
     end
 

@@ -121,15 +121,24 @@ class Todo::FileRepository
   end
 
   def archive(todos: list)
+    index = load_index
+
     todos.each do |todo|
       if todo.should_be_archived?
         todo_path = root_path.join("#{todo.id}.md")
         archived_todo_path = root_path.join("archived", "#{todo.id}.md")
         FileUtils.mv(todo_path, archived_todo_path)
+
+        index[:todos][todo.parent&.id.to_s.to_sym].delete(todo.id)
+        index[:todos].delete(todo.parent&.id.to_s.to_sym) if index[:todos][todo.parent&.id.to_s.to_sym].empty?
+        index[:archived][todo.parent&.id.to_s.to_sym] ||= []
+        index[:archived][todo.parent&.id.to_s.to_sym] << todo.id
       end
 
       archive(todos: todo.subtodos)
     end
+
+    save_index(index)
   end
 
   private
