@@ -7,6 +7,7 @@ class Todo::CLI
       todo done <id>...
       todo undone <id>...
       todo wait <id>...
+      todo archive
       todo -h | --help
       todo -v | --version
     
@@ -79,6 +80,8 @@ class Todo::CLI
       Todo::Update.new(arguments: arguments, state: :undone)
     when "wait"
       Todo::Update.new(arguments: arguments, state: :waiting, name: "wait")
+    when "archive"
+      Todo::Archive.new(arguments: arguments)
     else
       raise CommandNotFound.new(unknown_name: name)
     end
