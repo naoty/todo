@@ -29,7 +29,7 @@ class Todo::FileRepository
         next nil
       end
 
-      todo.subtodos = list(id: todo.id)
+      list(id: todo.id).each { |subtodo| todo.append_subtodo(subtodo) }
       todo
     end
     todos.compact
