@@ -1,3 +1,4 @@
+require "fileutils"
 require "json"
 require "pathname"
 require "yaml"
@@ -116,6 +117,18 @@ class Todo::FileRepository
       next if subtodo_ids.nil?
 
       update(ids: subtodo_ids, state: state)
+    end
+  end
+
+  def archive(todos: list)
+    todos.each do |todo|
+      if todo.should_be_archived?
+        todo_path = root_path.join("#{todo.id}.md")
+        archived_todo_path = root_path.join("archived", "#{todo.id}.md")
+        FileUtils.mv(todo_path, archived_todo_path)
+      end
+
+      archive(todos: todo.subtodos)
     end
   end
 

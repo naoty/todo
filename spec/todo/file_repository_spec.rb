@@ -581,4 +581,178 @@ RSpec.describe Todo::FileRepository do
       end
     end
   end
+
+  describe "#archive" do
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+    end
+
+    let(:todo_id) { 1 }
+    let(:todo_path) { Pathname.pwd.join("#{todo_id}.md") }
+    let(:archived_todo_path) { archived_path.join("#{todo_id}.md") }
+    let(:subtodo_id) { 2 }
+    let(:subtodo_path) { Pathname.pwd.join("#{subtodo_id}.md") }
+    let(:archived_subtodo_path) { archived_path.join("#{subtodo_id}.md") }
+    let(:unknown_todo_id) { 100 }
+
+    shared_context "when parent todo is undone" do
+      before do
+        todo_path.open("wb") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: undone
+            ---
+
+            body
+          TEXT
+        end
+      end
+    end
+
+    shared_context "when parent todo is done" do
+      before do
+        todo_path.open("wb") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: done
+            ---
+
+            body
+          TEXT
+        end
+      end
+    end
+
+    shared_context "when subtodo is undone" do
+      before do
+        subtodo_path.open("wb") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: undone
+            ---
+
+            body
+          TEXT
+        end
+      end
+    end
+
+    shared_context "when subtodo is done" do
+      before do
+        subtodo_path.open("wb") do |file|
+          file.puts(<<~TEXT)
+            ---
+            title: dummy
+            state: done
+            ---
+
+            body
+          TEXT
+        end
+      end
+    end
+
+    shared_context "when index file is normal" do
+      before do
+        index_json = JSON.pretty_generate({
+          todos: {
+            "": [todo_id],
+            "#{todo_id}": [subtodo_id]
+          },
+          archived: {},
+          metadata: {
+            lastId: subtodo_id,
+            missingIds: []
+          }
+        })
+        index_path.open("wb") { |file| file.puts(index_json) }
+      end
+    end
+
+    shared_context "when index file includes ID which todo file doesn't exist" do
+      before do
+        index_json = JSON.pretty_generate({
+          todos: {
+            "": [todo_id, unknown_todo_id],
+            "#{todo_id}": [subtodo_id]
+          },
+          archived: {},
+          metadata: {
+            lastId: subtodo_id,
+            missingIds: []
+          }
+        })
+        index_path.open("wb") { |file| file.puts(index_json) }
+      end
+    end
+
+    context "when both parent todo and subtodo is undone" do
+      include_context "when parent todo is undone"
+      include_context "when subtodo is undone"
+      include_context "when index file is normal"
+
+      it "doesn't move parent todo file and subtodo file" do
+        expect { repository.archive }
+          .to not_change { todo_path.exist? }
+          .and not_change { subtodo_path.exist? }
+      end
+    end
+
+    context "when parent todo is done but subtodo is undone" do
+      include_context "when parent todo is done"
+      include_context "when subtodo is undone"
+      include_context "when index file is normal"
+
+      it "moves both parent todo file and subtodo file into archived directory" do
+        expect { repository.archive }
+          .to change { todo_path.exist? }.to(false)
+          .and change { archived_todo_path.exist? }.to(true)
+          .and change { subtodo_path.exist? }.to(false)
+          .and change { archived_subtodo_path.exist? }.to(true)
+      end
+    end
+
+    context "when parent todo is undone but subtodo is done" do
+      include_context "when parent todo is undone"
+      include_context "when subtodo is done"
+      include_context "when index file is normal"
+
+      it "moves only subtodo file into archived directory" do
+        expect { repository.archive }
+          .to not_change { todo_path.exist? }
+          .and change { subtodo_path.exist? }.to(false)
+          .and change { archived_subtodo_path.exist? }.to(true)
+      end
+    end
+
+    context "when both parent todo and subtodo is done" do
+      include_context "when parent todo is done"
+      include_context "when subtodo is done"
+      include_context "when index file is normal"
+
+      it "moves both parent todo file and subtodo file into archived directory" do
+        expect { repository.archive }
+          .to change { todo_path.exist? }.to(false)
+          .and change { archived_todo_path.exist? }.to(true)
+          .and change { subtodo_path.exist? }.to(false)
+          .and change { archived_subtodo_path.exist? }.to(true)
+      end
+    end
+
+    context "when index file includes ID which todo file doesn't exist" do
+      include_context "when parent todo is done"
+      include_context "when subtodo is done"
+      include_context "when index file includes ID which todo file doesn't exist"
+
+      it "puts error message to error output" do
+        repository.archive
+
+        unknown_todo_path = Pathname.pwd.join("#{unknown_todo_id}.md")
+        expect(error_output.string).to eq("todo file is not found: #{unknown_todo_path}\n")
+      end
+    end
+  end
 end
