@@ -2,7 +2,8 @@ class Todo::CLI
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list
-      todo add (-p | --parent <id>) <title>
+      todo add <title> (-p | --parent <id>)
+      todo move <id> <position> (-p | --parent <id>)
       todo delete <id>...
       todo done <id>...
       todo undone <id>...
@@ -72,6 +73,8 @@ class Todo::CLI
       Todo::Add.new(arguments: arguments)
     when "list"
       Todo::List.new(arguments: arguments)
+    when "move"
+      Todo::Move.new(arguments: arguments)
     when "delete"
       Todo::Delete.new(arguments: arguments)
     when "done"

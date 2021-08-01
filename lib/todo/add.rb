@@ -1,7 +1,7 @@
 class Todo::Add
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
-      todo add (-p | --parent <id>) <title>
+      todo add <title> (-p | --parent <id>)
       todo add -h | --help
     
     Options:

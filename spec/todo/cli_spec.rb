@@ -62,6 +62,7 @@ RSpec.describe Todo::CLI do
     {
       "add" => Todo::Add,
       "list" => Todo::List,
+      "move" => Todo::Move,
       "delete" => Todo::Delete,
       "done" => Todo::Update,
       "undone" => Todo::Update,
