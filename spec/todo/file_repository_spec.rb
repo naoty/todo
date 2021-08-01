@@ -802,4 +802,78 @@ RSpec.describe Todo::FileRepository do
       end
     end
   end
+
+  describe "#move" do
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+    end
+
+    before do
+      index_path.open("wb") do |file|
+        file.puts(JSON.pretty_generate({
+          todos: {
+            "": [1, 2, 3],
+            "1": [4]
+          },
+          archived: {
+            "": [5],
+            "5": [6]
+          },
+          metadata: {
+            lastId: 6,
+            missingIds: []
+          }
+        }))
+      end
+
+      1.upto(6) do |id|
+        todo_path = Pathname.pwd.join("#{id}.md")
+        todo_path.open("wb") do |file|
+          file.puts <<~TEXT
+            ---
+            title: dummy
+            state: done
+            ---
+
+            body
+          TEXT
+        end
+      end
+    end
+
+    [
+      [[2, nil, -1], {todos: {"": [1, 3, 2], "1": [4]}}],
+      [[2, nil, 1], {todos: {"": [2, 1, 3], "1": [4]}}],
+      [[2, nil, 3], {todos: {"": [1, 3, 2], "1": [4]}}],
+      [[2, nil, 4], {todos: {"": [1, 3, 2], "1": [4]}}],
+      [[4, nil, 4], {todos: {"": [1, 2, 3, 4]}}],
+      [[2, 1, 1], {todos: {"": [1, 3], "1": [2, 4]}}],
+      [[2, 3, 1], {todos: {"": [1, 3], "1": [4], "3": [2]}}]
+    ].each do |(id, parent_id, position), expected_index|
+      context "when id: #{id}, parent_id: #{parent_id}, position: #{position}" do
+        it "updates index file" do
+          expect {
+            repository.move(id: id, parent_id: parent_id, position: position)
+          }.to change {
+            JSON.parse(index_path.read, symbolize_names: true)
+          }.to(a_hash_including(expected_index))
+        end
+      end
+    end
+
+    [
+      [[100, nil, 1], "todo is not found: 100"],
+      [[1, 100, 1], "parent is not found: 100"],
+      [[1, 1, 1], "moving a todo under itself is forbidden"],
+      [[5, nil, 1], "moving an archived todo is forbidden"],
+      [[1, 6, 1], "moving a todo under an archived todo is forbidden"]
+    ].each do |(id, parent_id, position), error_message|
+      context "when id: #{id}, parent_id: #{parent_id}, position: #{position}" do
+        it "puts error message to error output" do
+          repository.move(id: id, parent_id: parent_id, position: position)
+          expect(error_output.string).to eq(error_message + "\n")
+        end
+      end
+    end
+  end
 end

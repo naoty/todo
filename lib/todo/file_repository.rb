@@ -141,6 +141,57 @@ class Todo::FileRepository
     save_index(index)
   end
 
+  def move(id:, position:, parent_id: nil)
+    if id == parent_id
+      error_output.puts("moving a todo under itself is forbidden")
+      return
+    end
+
+    index = load_index
+
+    index[:archived].each do |_, subtodos|
+      if subtodos.include?(id)
+        error_output.puts("moving an archived todo is forbidden")
+        return nil
+      end
+
+      if subtodos.include?(parent_id)
+        error_output.puts("moving a todo under an archived todo is forbidden")
+        return nil
+      end
+    end
+
+    todo_found = false
+    parent_found = false
+    index[:todos].each do |parent_key, subtodos|
+      if subtodos.include?(id)
+        todo_found = true
+        subtodos.delete(id)
+        index[:todos].delete(parent_key) if subtodos.empty?
+      end
+
+      if subtodos.include?(parent_id)
+        parent_found = true
+      end
+    end
+
+    if !todo_found
+      error_output.puts("todo is not found: #{id}")
+      return
+    end
+
+    if !parent_id.nil? && !parent_found
+      error_output.puts("parent is not found: #{parent_id}")
+      return
+    end
+
+    insert_index = position > 0 ? position - 1 : position
+    index[:todos][parent_id.to_s.to_sym] ||= []
+    index[:todos][parent_id.to_s.to_sym].insert(insert_index, id).compact!
+
+    save_index(index)
+  end
+
   private
 
   def setup
