@@ -3,6 +3,7 @@ class Todo::CLI
     Usage:
       todo list
       todo add <title> (-p | --parent <id>)
+      todo open <id>
       todo move <id> <position> (-p | --parent <id>)
       todo delete <id>...
       todo done <id>...
@@ -73,6 +74,8 @@ class Todo::CLI
       Todo::Add.new(arguments: arguments)
     when "list"
       Todo::List.new(arguments: arguments)
+    when "open"
+      Todo::Open.new(arguments: arguments)
     when "move"
       Todo::Move.new(arguments: arguments)
     when "delete"
