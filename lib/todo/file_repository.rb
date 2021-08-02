@@ -192,6 +192,18 @@ class Todo::FileRepository
     save_index(index)
   end
 
+  def open(id:)
+    todo_path = root_path.join("#{id}.md")
+    todo_path = root_path.join("archived", "#{id}.md") unless todo_path.exist?
+
+    unless todo_path.exist?
+      error_output.puts("todo is not found: #{id}")
+      return
+    end
+
+    system("open #{todo_path}")
+  end
+
   private
 
   def setup

@@ -876,4 +876,47 @@ RSpec.describe Todo::FileRepository do
       end
     end
   end
+
+  describe "#open" do
+    let!(:repository) do
+      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+    end
+
+    context "when a todo with given ID exists" do
+      let(:id) { 1 }
+      let(:todo_path) { Pathname.pwd.join("#{id}.md") }
+
+      before do
+        FileUtils.touch(todo_path)
+      end
+
+      it "calls Kernel#.system with `open path/to/todo_file.md`" do
+        expect(repository).to receive(:system).with("open #{todo_path}")
+        repository.open(id: id)
+      end
+    end
+
+    context "when a todo with given ID exists and is archived" do
+      let(:id) { 1 }
+      let(:todo_path) { archived_path.join("1.md") }
+
+      before do
+        FileUtils.touch(todo_path)
+      end
+
+      it "calls Kernel#.system with `open path/to/archived/todo_file.md`" do
+        expect(repository).to receive(:system).with("open #{todo_path}")
+        repository.open(id: id)
+      end
+    end
+
+    context "when a todo with given ID doesn't exist" do
+      let(:id) { 1 }
+
+      it "puts error message to error output" do
+        repository.open(id: id)
+        expect(error_output.string).to eq("todo is not found: #{id}\n")
+      end
+    end
+  end
 end
