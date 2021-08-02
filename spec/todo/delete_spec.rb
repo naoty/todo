@@ -18,9 +18,9 @@ RSpec.describe Todo::Delete do
       end
 
       it "exits with status code 1" do
-        add = Todo::Delete.new(arguments: [], output: output, error_output: error_output)
+        delete = Todo::Delete.new(arguments: [], output: output, error_output: error_output)
         expect {
-          add.run(repository: repository)
+          delete.run(repository: repository)
         }.to raise_error(an_instance_of(SystemExit).and(having_attributes({status: 1})))
       end
     end
@@ -28,8 +28,8 @@ RSpec.describe Todo::Delete do
     ["-h", "--help"].each do |flag|
       context "when arguments include '#{flag}' flag" do
         it "puts help message to output" do
-          add = Todo::Delete.new(arguments: [flag], output: output, error_output: error_output)
-          add.run(repository: repository)
+          delete = Todo::Delete.new(arguments: [flag], output: output, error_output: error_output)
+          delete.run(repository: repository)
           expect(output.string).to eq(Todo::Delete::HELP_MESSAGE)
         end
       end
