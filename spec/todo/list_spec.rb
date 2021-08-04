@@ -5,56 +5,39 @@ require "stringio"
 RSpec.describe Todo::List do
   let(:output) { StringIO.new }
   let(:error_output) { StringIO.new }
+  let(:repository) { instance_double(Todo::FileRepository) }
+
+  let(:todos) do
+    [
+      Todo::Todo.new(id: 1, title: "dummy", state: :undone)
+    ]
+  end
 
   describe "#run" do
     context "when arguments are empty" do
-      context "when no todos have subtodos" do
-        it "puts todos" do
-          list = Todo::List.new(arguments: [], output: output, error_output: error_output)
-          repository = instance_double(Todo::FileRepository)
-          allow(repository).to receive(:list).and_return([
-            Todo::Todo.new(id: 2, title: "dummy", state: :waiting),
-            Todo::Todo.new(id: 1, title: "dummy", state: :undone),
-            Todo::Todo.new(id: 10, title: "dummy", state: :done)
-          ])
+      let(:arguments) { [] }
 
-          list.run(repository: repository)
-          expect(output.string).to eq(<<-TEXT)
-   2 | \e[2mdummy\e[0m
-   1 | dummy
-  10 | \e[2;9mdummy\e[0m
-          TEXT
-        end
+      it "calls FileRepository#list" do
+        expect(repository).to receive(:list).and_return(todos)
+        list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
+        list.run(repository: repository)
       end
 
-      context "when a todo have subtodos" do
-        it "puts todos and subtudos" do
-          list = Todo::List.new(arguments: [], output: output, error_output: error_output)
-          repository = instance_double(Todo::FileRepository)
-          allow(repository).to receive(:list).and_return([
-            Todo::Todo.new(id: 1, title: "dummy", subtodos: [
-              Todo::Todo.new(id: 2, title: "dummy", subtodos: [
-                Todo::Todo.new(id: 3, title: "dummy")
-              ])
-            ])
-          ])
-
-          list.run(repository: repository)
-          expect(output.string).to eq(<<-TEXT)
-  1 | dummy
-      2 | dummy
-          3 | dummy
-          TEXT
-        end
+      it "calls Printable#print_todos" do
+        allow(repository).to receive(:list).and_return(todos)
+        list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
+        expect(list).to receive(:print_todos)
+        list.run(repository: repository)
       end
     end
 
     ["-h", "--help"].each do |flag|
       context "when arguments include #{flag} flag" do
-        it "puts help message" do
-          list = Todo::List.new(arguments: [flag], output: output, error_output: error_output)
-          repository = instance_double(Todo::FileRepository)
+        let(:arguments) { [flag] }
 
+        it "puts help message" do
+          allow(repository).to receive(:list).and_return(todos)
+          list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
           list.run(repository: repository)
           expect(output.string).to eq(Todo::List::HELP_MESSAGE)
         end

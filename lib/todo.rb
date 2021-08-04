@@ -9,6 +9,7 @@ module Todo
   autoload :List, "todo/list"
   autoload :Move, "todo/move"
   autoload :Open, "todo/open"
+  autoload :Printable, "todo/printable"
   autoload :Todo, "todo/todo"
   autoload :Update, "todo/update"
 end
