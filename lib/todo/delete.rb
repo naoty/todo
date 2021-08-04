@@ -1,4 +1,6 @@
 class Todo::Delete
+  include Todo::Printable
+
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo delete <id>...
@@ -28,5 +30,8 @@ class Todo::Delete
     end
 
     repository.delete(ids: arguments.map(&:to_i))
+
+    todos = repository.list
+    print_todos(todos, indent_width: 2)
   end
 end

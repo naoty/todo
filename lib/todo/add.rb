@@ -1,4 +1,6 @@
 class Todo::Add
+  include Todo::Printable
+
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo add <title> (-p | --parent <id>)
@@ -21,6 +23,7 @@ class Todo::Add
     case result
     in { help: true }
       output.puts(HELP_MESSAGE)
+      return
     in { parent_id: parent_id, title: title }
       repository.create(title: title, parent_id: parent_id.to_i)
     in { title: title }
@@ -29,6 +32,9 @@ class Todo::Add
       error_output.puts(HELP_MESSAGE)
       exit 1
     end
+
+    todos = repository.list
+    print_todos(todos, indent_width: 2)
   end
 
   private

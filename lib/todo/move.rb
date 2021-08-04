@@ -1,4 +1,6 @@
 class Todo::Move
+  include Todo::Printable
+
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo move <id> <position> (-p | --parent <parent id>)
@@ -22,6 +24,7 @@ class Todo::Move
     case result
     in { help: true }
       output.puts(HELP_MESSAGE)
+      return
     in { invalid_id: id }
       error_output.puts("id is invalid: #{id}")
       exit 1
@@ -42,6 +45,9 @@ class Todo::Move
       error_output.puts(HELP_MESSAGE)
       exit 1
     end
+
+    todos = repository.list
+    print_todos(todos, indent_width: 2)
   end
 
   private

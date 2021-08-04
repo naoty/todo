@@ -1,4 +1,6 @@
 class Todo::Archive
+  include Todo::Printable
+
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo archive
@@ -23,5 +25,8 @@ class Todo::Archive
     end
 
     repository.archive
+
+    todos = repository.list
+    print_todos(todos, indent_width: 2)
   end
 end

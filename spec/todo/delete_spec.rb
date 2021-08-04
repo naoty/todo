@@ -7,6 +7,10 @@ RSpec.describe Todo::Delete do
     let(:error_output) { StringIO.new }
     let(:repository) { instance_double(Todo::FileRepository) }
 
+    before do
+      allow(repository).to receive(:list).and_return([])
+    end
+
     context "when arguments are empty" do
       it "puts help message to error output" do
         delete = Todo::Delete.new(arguments: [], output: output, error_output: error_output)

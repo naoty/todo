@@ -6,6 +6,10 @@ RSpec.describe Todo::Archive do
     let(:error_output) { StringIO.new }
     let(:repository) { instance_double(Todo::FileRepository) }
 
+    before do
+      allow(repository).to receive(:list).and_return([])
+    end
+
     context "when arguments are empty" do
       it "calls FileRepository#archive" do
         expect(repository).to receive(:archive)
