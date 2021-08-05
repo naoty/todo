@@ -3,7 +3,7 @@ class Todo::Add
 
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
-      todo add <title> (-p | --parent <id>) (-o | --open)
+      todo add <title> (<position>) (-p | --parent <id>) (-o | --open)
       todo add -h | --help
     
     Options:
@@ -26,8 +26,8 @@ class Todo::Add
     in { help: true }
       output.puts(HELP_MESSAGE)
       return
-    in { parent_id: parent_id, title: title, open: open_flag }
-      todo = repository.create(title: title, parent_id: parent_id&.to_i)
+    in { position: position, parent_id: parent_id, title: title, open: open_flag }
+      todo = repository.create(title: title, position: position, parent_id: parent_id&.to_i)
       repository.open(id: todo.id) if open_flag
     else
       error_output.puts(HELP_MESSAGE)
@@ -41,7 +41,7 @@ class Todo::Add
   private
 
   def parse_arguments(arguments)
-    result = {parent_id: nil, open: false}
+    result = {position: nil, parent_id: nil, open: false}
     arguments_copy = arguments.dup
     arguments_copy.each.with_index do |argument, index|
       case argument
@@ -52,7 +52,11 @@ class Todo::Add
       when "-o", "--open"
         result[:open] = true
       else
-        result[:title] = argument
+        if result[:title].nil?
+          result[:title] = argument
+        else
+          result[:position] = argument.to_i
+        end
       end
     end
     result

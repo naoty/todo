@@ -36,7 +36,7 @@ class Todo::FileRepository
     todos.compact
   end
 
-  def create(title:, parent_id: nil)
+  def create(title:, position: nil, parent_id: nil)
     next_id = load_next_id
 
     todo = Todo::Todo.new(id: next_id, title: title, state: :undone, body: "")
@@ -44,9 +44,15 @@ class Todo::FileRepository
     encoded_todo = encode(todo)
     todo_path.open("wb") { |file| file.puts(encoded_todo) }
 
+    insert_index = case position
+      when nil then -1
+      when ..0 then position
+      else position - 1
+    end
+
     index = load_index
     index[:todos][parent_id.to_s.to_sym] ||= []
-    index[:todos][parent_id.to_s.to_sym] << todo.id
+    index[:todos][parent_id.to_s.to_sym].insert(insert_index, todo.id).compact!
     save_index(index)
 
     todo
