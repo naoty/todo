@@ -3,11 +3,13 @@ class Todo::Add
 
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
-      todo add <title> (-p | --parent <id>)
+      todo add <title> (-p | --parent <id>) (-o | --open)
       todo add -h | --help
     
     Options:
-      -h --help  Show thid message
+      -h --help    Show thid message
+      -p --parent  Parent TODO ID
+      -o --open    Open TODO file after create
   TEXT
 
   private attr_reader :arguments, :output, :error_output
@@ -24,10 +26,9 @@ class Todo::Add
     in { help: true }
       output.puts(HELP_MESSAGE)
       return
-    in { parent_id: parent_id, title: title }
-      repository.create(title: title, parent_id: parent_id.to_i)
-    in { title: title }
-      repository.create(title: title)
+    in { parent_id: parent_id, title: title, open: open_flag }
+      todo = repository.create(title: title, parent_id: parent_id&.to_i)
+      repository.open(id: todo.id) if open_flag
     else
       error_output.puts(HELP_MESSAGE)
       exit 1
@@ -40,7 +41,7 @@ class Todo::Add
   private
 
   def parse_arguments(arguments)
-    result = {}
+    result = {parent_id: nil, open: false}
     arguments_copy = arguments.dup
     arguments_copy.each.with_index do |argument, index|
       case argument
@@ -48,6 +49,8 @@ class Todo::Add
         result[:help] = true
       when "-p", "--parent"
         result[:parent_id] = arguments_copy.delete_at(index + 1)
+      when "-o", "--open"
+        result[:open] = true
       else
         result[:title] = argument
       end

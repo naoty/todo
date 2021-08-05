@@ -41,8 +41,8 @@ RSpec.describe Todo::Add do
 
     context "when arguments include title" do
       it "calls FileRepository#create with title" do
+        expect(repository).to receive(:create).with({title: "dummy", parent_id: nil})
         add = Todo::Add.new(arguments: ["dummy"], output: output, error_output: error_output)
-        expect(repository).to receive(:create).with({title: "dummy"})
         add.run(repository: repository)
       end
     end
@@ -50,8 +50,8 @@ RSpec.describe Todo::Add do
     ["-p", "--parent"].each do |option|
       context "when arguments include '#{option}' option" do
         it "calls FileRepository#create with title and parent_id" do
-          add = Todo::Add.new(arguments: [option, "1", "dummy"], output: output, error_output: error_output)
           expect(repository).to receive(:create).with({title: "dummy", parent_id: 1})
+          add = Todo::Add.new(arguments: [option, "1", "dummy"], output: output, error_output: error_output)
           add.run(repository: repository)
         end
       end
@@ -71,6 +71,20 @@ RSpec.describe Todo::Add do
           expect {
             add.run(repository: repository)
           }.to raise_error(an_instance_of(SystemExit).and(having_attributes({status: 1})))
+        end
+      end
+    end
+
+    ["-o", "--open"].each do |flag|
+      context "when arguments include '#{flag}' flag" do
+        let(:arguments) { ["dummy", flag] }
+        let(:todo) { Todo::Todo.new(id: 1, title: "dummy") }
+
+        it "calls FileRepository#open" do
+          allow(repository).to receive(:create).and_return(todo)
+          expect(repository).to receive(:open).with(id: 1)
+          add = Todo::Add.new(arguments: arguments, output: output, error_output: error_output)
+          add.run(repository: repository)
         end
       end
     end
