@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+### Added
+* `--open`, `-o` flag is added to `todo add` to open a TODO file after creating it.
+* `<position>` argument is added to `todo add` to create a TODO at given position.
+
 ### Changed
 * `list` command shows TODOs in a new format.
+* `done`, `undone`, `wait` command updates the state of subtodos recursively.
 
 ## 0.4.2 - 2020-06-14
 
