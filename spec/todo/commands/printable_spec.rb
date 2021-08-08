@@ -1,10 +1,10 @@
 require "spec_helper"
 require "stringio"
 
-RSpec.describe Todo::Printable do
+RSpec.describe Todo::Commands::Printable do
   let(:printer_klass) do
     Class.new do
-      include Todo::Printable
+      include Todo::Commands::Printable
 
       def output
         @output ||= StringIO.new

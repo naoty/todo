@@ -3,4 +3,4 @@
 $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 require 'todo'
 
-Todo::CLI.new.run
+Todo::Commands::CLI.new.run

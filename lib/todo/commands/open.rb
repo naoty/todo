@@ -1,4 +1,4 @@
-class Todo::Open
+class Todo::Commands::Open < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo open <id>
@@ -7,14 +7,6 @@ class Todo::Open
     Options:
       -h --help  Show this message
   TEXT
-
-  private attr_reader :arguments, :output, :error_output
-
-  def initialize(arguments:, output: $stdout, error_output: $stderr)
-    @arguments = arguments
-    @output = output
-    @error_output = error_output
-  end
 
   def run(repository:)
     if arguments.empty?

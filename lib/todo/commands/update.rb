@@ -1,14 +1,10 @@
-class Todo::Update
-  include Todo::Printable
-
-  private attr_reader :arguments, :state, :name, :output, :error_output
+class Todo::Commands::Update < Todo::Commands::Command
+  attr_reader :state, :name
 
   def initialize(arguments:, state:, name: nil, output: $stdout, error_output: $stderr)
-    @arguments = arguments
+    super(arguments: arguments, output: output, error_output: error_output)
     @state = state
     @name = name || state
-    @output = output
-    @error_output = error_output
   end
 
   def run(repository:)

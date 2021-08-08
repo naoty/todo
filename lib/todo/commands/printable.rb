@@ -1,4 +1,4 @@
-module Todo::Printable
+module Todo::Commands::Printable
   def output
     raise NotImplementedError
   end

@@ -1,7 +1,7 @@
 require "spec_helper"
 require "stringio"
 
-RSpec.describe Todo::Update do
+RSpec.describe Todo::Commands::Update do
   describe "#run" do
     let(:output) { StringIO.new }
     let(:error_output) { StringIO.new }
@@ -13,7 +13,7 @@ RSpec.describe Todo::Update do
 
     context "when arguments are empty" do
       it "puts help message to error output" do
-        update = Todo::Update.new(arguments: [], state: :done, output: output, error_output: error_output)
+        update = described_class.new(arguments: [], state: :done, output: output, error_output: error_output)
         update.run(repository: repository)
       rescue SystemExit
         # ignore exit
@@ -22,7 +22,7 @@ RSpec.describe Todo::Update do
       end
 
       it "exits with status code 1" do
-        update = Todo::Update.new(arguments: [], state: :done, output: output, error_output: error_output)
+        update = described_class.new(arguments: [], state: :done, output: output, error_output: error_output)
         expect {
           update.run(repository: repository)
         }.to raise_error(an_instance_of(SystemExit).and(having_attributes({status: 1})))
@@ -32,7 +32,7 @@ RSpec.describe Todo::Update do
     ["-h", "--help"].each do |flag|
       context "when arguments include '#{flag}' flag" do
         it "puts help message to output" do
-          update = Todo::Update.new(arguments: [flag], state: :done, output: output, error_output: error_output)
+          update = described_class.new(arguments: [flag], state: :done, output: output, error_output: error_output)
           update.run(repository: repository)
           expect(output.string).to eq(update.help_message)
         end
@@ -42,7 +42,7 @@ RSpec.describe Todo::Update do
     context "when arguments include IDs" do
       it "calls Todo::FileRepository#update" do
         expect(repository).to receive(:update).with(ids: [1], state: :done)
-        update = Todo::Update.new(arguments: ["1"], state: :done, output: output, error_output: error_output)
+        update = described_class.new(arguments: ["1"], state: :done, output: output, error_output: error_output)
         update.run(repository: repository)
       end
     end

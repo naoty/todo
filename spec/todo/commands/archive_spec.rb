@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Todo::Archive do
+RSpec.describe Todo::Commands::Archive do
   describe "#run" do
     let(:output) { StringIO.new }
     let(:error_output) { StringIO.new }
@@ -13,7 +13,7 @@ RSpec.describe Todo::Archive do
     context "when arguments are empty" do
       it "calls FileRepository#archive" do
         expect(repository).to receive(:archive)
-        archive = Todo::Archive.new(arguments: [], output: output, error_output: error_output)
+        archive = described_class.new(arguments: [], output: output, error_output: error_output)
         archive.run(repository: repository)
       end
     end
@@ -21,9 +21,9 @@ RSpec.describe Todo::Archive do
     ["-h", "--help"].each do |flag|
       context "when arguments include '#{flag}' flag" do
         it "puts help message to output" do
-          archive = Todo::Archive.new(arguments: [flag], output: output, error_output: error_output)
+          archive = described_class.new(arguments: [flag], output: output, error_output: error_output)
           archive.run(repository: repository)
-          expect(output.string).to eq(Todo::Archive::HELP_MESSAGE)
+          expect(output.string).to eq(described_class::HELP_MESSAGE)
         end
       end
     end

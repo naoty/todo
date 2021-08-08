@@ -1,6 +1,4 @@
-class Todo::Move
-  include Todo::Printable
-
+class Todo::Commands::Move < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo move <id> <position> (-p | --parent <parent id>)
@@ -9,14 +7,6 @@ class Todo::Move
     Options:
       -h --help  Show thid message
   TEXT
-
-  private attr_reader :arguments, :output, :error_output
-
-  def initialize(arguments:, output: $stdout, error_output: $stderr)
-    @arguments = arguments
-    @output = output
-    @error_output = error_output
-  end
 
   def run(repository:)
     result = parse_arguments

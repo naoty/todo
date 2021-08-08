@@ -1,6 +1,4 @@
-class Todo::Add
-  include Todo::Printable
-
+class Todo::Commands::Add < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo add <title> (<position>) (-p | --parent <id>) (-o | --open)
@@ -11,14 +9,6 @@ class Todo::Add
       -p --parent  Parent TODO ID
       -o --open    Open TODO file after create
   TEXT
-
-  private attr_reader :arguments, :output, :error_output
-
-  def initialize(arguments:, output: $stdout, error_output: $stderr)
-    @arguments = arguments
-    @output = output
-    @error_output = error_output
-  end
 
   def run(repository:)
     result = parse_arguments(arguments)

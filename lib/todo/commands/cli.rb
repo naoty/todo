@@ -1,4 +1,4 @@
-class Todo::CLI
+class Todo::Commands::CLI < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list
@@ -17,14 +17,6 @@ class Todo::CLI
       -h --help     Show this message
       -v --version  Show version
   TEXT
-
-  private attr_reader :arguments, :output, :error_output
-
-  def initialize(arguments: ARGV, output: $stdout, error_output: $stderr)
-    @arguments = arguments
-    @output = output
-    @error_output = error_output
-  end
 
   def run
     if arguments.empty?
@@ -71,23 +63,23 @@ class Todo::CLI
   def build_command(name:, arguments:)
     case name
     when "add"
-      Todo::Add.new(arguments: arguments)
+      Todo::Commands::Add.new(arguments: arguments)
     when "list"
-      Todo::List.new(arguments: arguments)
+      Todo::Commands::List.new(arguments: arguments)
     when "open"
-      Todo::Open.new(arguments: arguments)
+      Todo::Commands::Open.new(arguments: arguments)
     when "move"
-      Todo::Move.new(arguments: arguments)
+      Todo::Commands::Move.new(arguments: arguments)
     when "delete"
-      Todo::Delete.new(arguments: arguments)
+      Todo::Commands::Delete.new(arguments: arguments)
     when "done"
-      Todo::Update.new(arguments: arguments, state: :done)
+      Todo::Commands::Update.new(arguments: arguments, state: :done)
     when "undone"
-      Todo::Update.new(arguments: arguments, state: :undone)
+      Todo::Commands::Update.new(arguments: arguments, state: :undone)
     when "wait"
-      Todo::Update.new(arguments: arguments, state: :waiting, name: "wait")
+      Todo::Commands::Update.new(arguments: arguments, state: :waiting, name: "wait")
     when "archive"
-      Todo::Archive.new(arguments: arguments)
+      Todo::Commands::Archive.new(arguments: arguments)
     else
       raise CommandNotFound.new(unknown_name: name)
     end

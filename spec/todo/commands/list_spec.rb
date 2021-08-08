@@ -1,8 +1,7 @@
 require "spec_helper"
-
 require "stringio"
 
-RSpec.describe Todo::List do
+RSpec.describe Todo::Commands::List do
   let(:output) { StringIO.new }
   let(:error_output) { StringIO.new }
   let(:repository) { instance_double(Todo::FileRepository) }
@@ -19,13 +18,13 @@ RSpec.describe Todo::List do
 
       it "calls FileRepository#list" do
         expect(repository).to receive(:list).and_return(todos)
-        list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
+        list = described_class.new(arguments: arguments, output: output, error_output: error_output)
         list.run(repository: repository)
       end
 
       it "calls Printable#print_todos" do
         allow(repository).to receive(:list).and_return(todos)
-        list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
+        list = described_class.new(arguments: arguments, output: output, error_output: error_output)
         expect(list).to receive(:print_todos)
         list.run(repository: repository)
       end
@@ -37,9 +36,9 @@ RSpec.describe Todo::List do
 
         it "puts help message" do
           allow(repository).to receive(:list).and_return(todos)
-          list = Todo::List.new(arguments: arguments, output: output, error_output: error_output)
+          list = described_class.new(arguments: arguments, output: output, error_output: error_output)
           list.run(repository: repository)
-          expect(output.string).to eq(Todo::List::HELP_MESSAGE)
+          expect(output.string).to eq(described_class::HELP_MESSAGE)
         end
       end
     end
