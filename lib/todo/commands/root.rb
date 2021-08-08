@@ -63,23 +63,23 @@ class Todo::Commands::Root < Todo::Commands::Command
   def build_command(name:, arguments:)
     case name
     when "add"
-      Todo::Commands::Add.new(arguments: arguments)
+      Todo::Commands::Add.new(arguments: arguments, output: output, error_output: error_output)
     when "list"
-      Todo::Commands::List.new(arguments: arguments)
+      Todo::Commands::List.new(arguments: arguments, output: output, error_output: error_output)
     when "open"
-      Todo::Commands::Open.new(arguments: arguments)
+      Todo::Commands::Open.new(arguments: arguments, output: output, error_output: error_output)
     when "move"
-      Todo::Commands::Move.new(arguments: arguments)
+      Todo::Commands::Move.new(arguments: arguments, output: output, error_output: error_output)
     when "delete"
-      Todo::Commands::Delete.new(arguments: arguments)
+      Todo::Commands::Delete.new(arguments: arguments, output: output, error_output: error_output)
     when "done"
-      Todo::Commands::Update.new(arguments: arguments, state: :done)
+      Todo::Commands::Update.new(arguments: arguments, state: :done, output: output, error_output: error_output)
     when "undone"
-      Todo::Commands::Update.new(arguments: arguments, state: :undone)
+      Todo::Commands::Update.new(arguments: arguments, state: :undone, output: output, error_output: error_output)
     when "wait"
-      Todo::Commands::Update.new(arguments: arguments, state: :waiting, name: "wait")
+      Todo::Commands::Update.new(arguments: arguments, state: :waiting, name: "wait", output: output, error_output: error_output)
     when "archive"
-      Todo::Commands::Archive.new(arguments: arguments)
+      Todo::Commands::Archive.new(arguments: arguments, output: output, error_output: error_output)
     else
       raise CommandNotFound.new(unknown_name: name)
     end
