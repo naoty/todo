@@ -3,8 +3,7 @@
 ## Installation
 
 ```
-$ brew tap naoty/misc
-$ brew install todo
+$ brew install naoty/misc/todo
 ```
 
 ## Usage
