@@ -3,7 +3,7 @@ module Todo::Commands
 
   autoload :Add, "todo/commands/add"
   autoload :Archive, "todo/commands/archive"
-  autoload :CLI, "todo/commands/cli"
+  autoload :Root, "todo/commands/root"
   autoload :Delete, "todo/commands/Delete"
   autoload :List, "todo/commands/list"
   autoload :Move, "todo/commands/move"

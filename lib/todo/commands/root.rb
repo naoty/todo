@@ -1,4 +1,4 @@
-class Todo::Commands::CLI < Todo::Commands::Command
+class Todo::Commands::Root < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list

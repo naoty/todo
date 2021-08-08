@@ -1,7 +1,7 @@
 require "spec_helper"
 require "stringio"
 
-RSpec.describe Todo::Commands::CLI do
+RSpec.describe Todo::Commands::Root do
   describe "#run" do
     let(:output) { StringIO.new }
     let(:error_output) { StringIO.new }
