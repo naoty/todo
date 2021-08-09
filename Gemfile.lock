@@ -1,3 +1,8 @@
+PATH
+  remote: .
+  specs:
+    todo (0.5.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -53,9 +58,10 @@ PLATFORMS
   x86_64-darwin-19
 
 DEPENDENCIES
-  rspec
-  simplecov
-  standard
+  rspec (~> 3.10)
+  simplecov (~> 0.21)
+  standard (~> 1.1)
+  todo!
 
 BUNDLED WITH
    2.2.15
