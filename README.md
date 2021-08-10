@@ -2,8 +2,16 @@
 
 ## Installation
 
+### Homebrew
+
 ```
 $ brew install naoty/misc/todo
+```
+
+### Rubygems
+
+```
+$ gem install todo --version "<version>" --source "https://rubygems.pkg.github.com/naoty"
 ```
 
 ## Usage
