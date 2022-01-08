@@ -38,10 +38,10 @@
 
 ## 0.3.0
 
-## Added
+### Added
 * `next` command to show a next undone todo.
 
-## Changed
+### Changed
 * `done` command without any orders marks a next undone todo as done.
 
 ## 0.2.1
