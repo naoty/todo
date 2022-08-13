@@ -1,5 +1,5 @@
 require "bundler/setup"
-Bundler.require(:test)
+require "simplecov"
 
 SimpleCov.start do
   enable_coverage :branch
