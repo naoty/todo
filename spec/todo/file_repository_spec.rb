@@ -335,6 +335,18 @@ RSpec.describe Todo::FileRepository do
       Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
     end
 
+    shared_context "when title includes square brackets" do
+      let(:title) { "[dummy]" }
+    end
+
+    shared_context "when title includes colons" do
+      let(:title) { ":dummy" }
+    end
+
+    shared_context "when title doesn't any special characters" do
+      let(:title) { "dummy" }
+    end
+
     shared_context "when missing IDs are empty" do
       before do
         index_json = JSON.pretty_generate({
@@ -429,13 +441,14 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when missing IDs are empty and position is 0" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are empty"
       include_context "when position is 0"
       include_context "when parent_id isn't given"
 
       it "updates an index file" do
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({
@@ -452,13 +465,14 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when missing IDs are empty and position is -1" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are empty"
       include_context "when position is -1"
       include_context "when parent_id isn't given"
 
       it "updates an index file" do
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({
@@ -475,13 +489,14 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when missing IDs are empty and position is larger than or equal to the length of todos" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are empty"
       include_context "when position is larger than or equal to the length of todos"
       include_context "when parent_id isn't given"
 
       it "updates an index file" do
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({
@@ -498,6 +513,7 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when missing IDs are empty and parent_id isn't given" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are empty"
       include_context "when position is nil"
       include_context "when parent_id isn't given"
@@ -505,7 +521,7 @@ RSpec.describe Todo::FileRepository do
       it "creates a todo file" do
         todo_path = Pathname.pwd.join("1.md")
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change { todo_path.exist? }.from(false).to(true)
 
         expect(todo_path.read).to eq(<<~TEXT)
@@ -520,7 +536,7 @@ RSpec.describe Todo::FileRepository do
 
       it "updates an index file" do
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({
@@ -536,7 +552,54 @@ RSpec.describe Todo::FileRepository do
       end
     end
 
+    context "when title includes square brackets, missing IDs are empty and parent_id isn't given" do
+      include_context "when title includes square brackets"
+      include_context "when missing IDs are empty"
+      include_context "when position is nil"
+      include_context "when parent_id isn't given"
+
+      it "creates a todo file with the title double-quoted" do
+        todo_path = Pathname.pwd.join("1.md")
+        expect {
+          repository.create(title: title, position: position, parent_id: parent_id)
+        }.to change { todo_path.exist? }.from(false).to(true)
+
+        expect(todo_path.read).to eq(<<~TEXT)
+          ---
+          title: "[dummy]"
+          state: undone
+          ---
+
+
+        TEXT
+      end
+    end
+
+    context "when title includes square brackets, missing IDs are empty and parent_id isn't given" do
+      include_context "when title includes colons"
+      include_context "when missing IDs are empty"
+      include_context "when position is nil"
+      include_context "when parent_id isn't given"
+
+      it "creates a todo file with the title double-quoted" do
+        todo_path = Pathname.pwd.join("1.md")
+        expect {
+          repository.create(title: title, position: position, parent_id: parent_id)
+        }.to change { todo_path.exist? }.from(false).to(true)
+
+        expect(todo_path.read).to eq(<<~TEXT)
+          ---
+          title: ":dummy"
+          state: undone
+          ---
+
+
+        TEXT
+      end
+    end
+
     context "when missing IDs are empty and parent_id is given" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are empty"
       include_context "when position is nil"
       include_context "when parent_id is given"
@@ -544,7 +607,7 @@ RSpec.describe Todo::FileRepository do
       it "creates a todo file" do
         todo_path = Pathname.pwd.join("2.md")
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change { todo_path.exist? }.from(false).to(true)
 
         expect(todo_path.read).to eq(<<~TEXT)
@@ -559,7 +622,7 @@ RSpec.describe Todo::FileRepository do
 
       it "updates an index file" do
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({
@@ -577,6 +640,7 @@ RSpec.describe Todo::FileRepository do
     end
 
     context "when missing IDs are present and parent_id isn't given" do
+      include_context "when title doesn't any special characters"
       include_context "when missing IDs are present"
       include_context "when position is nil"
       include_context "when parent_id isn't given"
@@ -584,13 +648,13 @@ RSpec.describe Todo::FileRepository do
       it "creates a todo file with a missing ID" do
         todo_path = Pathname.pwd.join("#{missing_id}.md")
         expect {
-          repository.create(title: "dummy", position: position, parent_id: parent_id)
+          repository.create(title: title, position: position, parent_id: parent_id)
         }.to change { todo_path.exist? }.from(false).to(true)
       end
 
       it "removes a missing ID" do
         expect {
-          repository.create(title: "dummy", parent_id: parent_id)
+          repository.create(title: title, parent_id: parent_id)
         }.to change {
           JSON.parse(index_path.read, symbolize_names: true)
         }.to({

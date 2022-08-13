@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+* Double-quote titles with square brackets or colons to decode them correctly.
+
 ## 0.5.0 - 2021-08-07
 
 ### Added
@@ -34,7 +37,7 @@
 ## 0.3.1
 
 ### Fixed
-* Fix `next` command to show a todo when the subtodos of the todo are all done. 
+* Fix `next` command to show a todo when the subtodos of the todo are all done.
 
 ## 0.3.0
 

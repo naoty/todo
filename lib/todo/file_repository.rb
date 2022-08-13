@@ -274,9 +274,11 @@ class Todo::FileRepository
   end
 
   def encode(todo)
+    encoded_title = todo.title.match?(/[\[\]:]/) ? %("#{todo.title}") : todo.title
+
     <<~TEXT
       ---
-      title: #{todo.title}
+      title: #{encoded_title}
       state: #{todo.state}
       ---
 
