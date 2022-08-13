@@ -1,3 +1,5 @@
+require "pathname"
+
 class Todo::Commands::Root < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
@@ -12,7 +14,7 @@ class Todo::Commands::Root < Todo::Commands::Command
       todo archive
       todo -h | --help
       todo -v | --version
-    
+
     Options:
       -h --help     Show this message
       -v --version  Show version
@@ -36,7 +38,7 @@ class Todo::Commands::Root < Todo::Commands::Command
 
     command = build_command(name: arguments.first, arguments: arguments[1..])
     repository = Todo::FileRepository.new(
-      root_path: ENV["TODOS_PATH"] || Pathname.pwd,
+      root_path: ENV["TODOS_PATH"] || default_root_path,
       error_output: error_output
     )
     command.run(repository: repository)
@@ -83,5 +85,9 @@ class Todo::Commands::Root < Todo::Commands::Command
     else
       raise CommandNotFound.new(unknown_name: name)
     end
+  end
+
+  def default_root_path
+    Pathname.new(ENV.fetch("HOME")).join(".todos").to_s
   end
 end
