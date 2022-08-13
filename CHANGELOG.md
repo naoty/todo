@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+* Support auto completion for fig.
+
 ### Fixed
 * Double-quote titles with square brackets or colons to decode them correctly.
 * Fix default path for TODOs from current directory to $HOME/.todos.

@@ -20,6 +20,14 @@ $ gem install todo --version "<version>" --source "https://rubygems.pkg.github.c
 ## Environment variables
 * `TODOS_PATH`: The root path of TODO files (default: `$HOME/.todos`)
 
+## Auto completion
+
+### fig
+
+```
+npx @fig/publish-spec --spec-path .fig/autocomplete/src/todo.ts
+```
+
 ## Author
 
 [naoty](https://github.com/naoty)
