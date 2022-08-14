@@ -1,5 +1,5 @@
 module Todo
-  VERSION = "0.5.0"
+  VERSION = "0.5.1"
 
   autoload :Commands, "todo/commands"
   autoload :FileRepository, "todo/file_repository"

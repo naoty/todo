@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.1 - 2022-08-14
+
 ### Added
 * Support auto completion for fig.
 
