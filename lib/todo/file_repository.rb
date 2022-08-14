@@ -36,10 +36,10 @@ class Todo::FileRepository
     todos.compact
   end
 
-  def create(title:, position: nil, parent_id: nil)
+  def create(title:, tags: [], position: nil, parent_id: nil)
     next_id = load_next_id
 
-    todo = Todo::Todo.new(id: next_id, title: title, state: :undone, body: "")
+    todo = Todo::Todo.new(id: next_id, title: title, state: :undone, tags: tags, body: "")
     todo_path = root_path.join("#{todo.id}.md")
     encoded_todo = encode(todo)
     todo_path.open("wb") { |file| file.puts(encoded_todo) }
@@ -274,12 +274,21 @@ class Todo::FileRepository
   end
 
   def encode(todo)
-    encoded_title = todo.title.match?(/[\[\]:]/) ? %("#{todo.title}") : todo.title
+    metadata = {
+      title: todo.title.match?(/[\[\]:]/) ? %("#{todo.title}") : todo.title,
+      state: todo.state
+    }
+
+    unless todo.tags.empty?
+      tags_string = todo.tags.map { |tag| %("#{tag}") }.join(", ")
+      metadata[:tags] = %([#{tags_string}])
+    end
+
+    front_matter = metadata.map { |key, value| "#{key}: #{value}" }.join("\n")
 
     <<~TEXT
       ---
-      title: #{encoded_title}
-      state: #{todo.state}
+      #{front_matter}
       ---
 
       #{todo.body}
@@ -296,6 +305,7 @@ class Todo::FileRepository
       id: id,
       title: front_matter[:title],
       state: front_matter[:state]&.to_sym || :undone, # TODO: handle unknown status
+      tags: front_matter[:tags] || [],
       body: parts[2]
     )
   rescue Psych::SyntaxError

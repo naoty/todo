@@ -1,11 +1,12 @@
 class Todo::Todo
   attr_accessor :state, :subtodos, :parent
-  attr_reader :id, :title, :body
+  attr_reader :id, :title, :tags, :body
 
-  def initialize(id:, title:, state: :undone, body: "", subtodos: [])
+  def initialize(id:, title:, state: :undone, tags: [], body: "", subtodos: [])
     @id = id
     @title = title
     @state = state
+    @tags = tags
     @body = body
     @subtodos = subtodos
   end
