@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.6.0 - 2022-08-21
+
+### Added
+* `--tag`, `-t` option is added to `todo add` to create a new TODO file with tags.
+* `todo list` prints tags with color.
+
 ## 0.5.1 - 2022-08-14
 
 ### Added

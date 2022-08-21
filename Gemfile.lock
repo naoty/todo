@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    todo (0.5.1)
+    todo (0.6.0)
 
 GEM
   remote: https://rubygems.org/
