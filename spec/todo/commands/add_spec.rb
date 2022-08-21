@@ -41,7 +41,7 @@ RSpec.describe Todo::Commands::Add do
 
     context "when arguments include title" do
       it "calls FileRepository#create with title" do
-        expect(repository).to receive(:create).with({title: "dummy", position: nil, parent_id: nil})
+        expect(repository).to receive(:create).with({title: "dummy", tags: [], position: nil, parent_id: nil})
         add = described_class.new(arguments: ["dummy"], output: output, error_output: error_output)
         add.run(repository: repository)
       end
@@ -49,16 +49,34 @@ RSpec.describe Todo::Commands::Add do
 
     context "when arguments include title and position" do
       it "calls FileRepository#create with title and position" do
-        expect(repository).to receive(:create).with({title: "dummy", position: 0, parent_id: nil})
+        expect(repository).to receive(:create).with({title: "dummy", tags: [], position: 0, parent_id: nil})
         add = described_class.new(arguments: ["dummy", "0"], output: output, error_output: error_output)
         add.run(repository: repository)
+      end
+    end
+
+    ["-t", "--tag"].each do |option|
+      context "when arguments include '#{option}' option" do
+        it "calls FileRepository#create with title and tag" do
+          expect(repository).to receive(:create).with({title: "dummy", tags: ["dummy"], position: nil, parent_id: nil})
+          add = described_class.new(arguments: [option, "dummy", "dummy"])
+          add.run(repository: repository)
+        end
+      end
+
+      context "when arguments include multiple '#{option}' options" do
+        it "calls FileRepository#create with title and multiple tags" do
+          expect(repository).to receive(:create).with({title: "dummy", tags: ["dummy1", "dummy2"], position: nil, parent_id: nil})
+          add = described_class.new(arguments: [option, "dummy1", option, "dummy2", "dummy"])
+          add.run(repository: repository)
+        end
       end
     end
 
     ["-p", "--parent"].each do |option|
       context "when arguments include '#{option}' option" do
         it "calls FileRepository#create with title and parent_id" do
-          expect(repository).to receive(:create).with({title: "dummy", position: nil, parent_id: 1})
+          expect(repository).to receive(:create).with({title: "dummy", tags: [], position: nil, parent_id: 1})
           add = described_class.new(arguments: [option, "1", "dummy"], output: output, error_output: error_output)
           add.run(repository: repository)
         end

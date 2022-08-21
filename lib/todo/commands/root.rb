@@ -4,7 +4,7 @@ class Todo::Commands::Root < Todo::Commands::Command
   HELP_MESSAGE = <<~TEXT.freeze
     Usage:
       todo list
-      todo add <title> (<position>) (-p | --parent <id>) (-o | --open)
+      todo add <title> (<position>) (-t | --tag <tag>)... (-p | --parent <id>) (-o | --open)
       todo open <id>
       todo move <id> <position> (-p | --parent <id>)
       todo delete <id>...

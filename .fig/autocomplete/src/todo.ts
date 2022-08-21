@@ -22,6 +22,14 @@ const completionSpec: Fig.Spec = {
       ],
       options: [
         {
+          name: ["--tag", "-t"],
+          description: "The tag of a new TODO",
+          isRepeatable: true,
+          args: {
+            name: "tag"
+          }
+        },
+        {
           name: ["--parent", "-p"],
           description: "The parent ID of a new TODO",
           args: {
