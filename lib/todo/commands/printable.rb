@@ -17,12 +17,21 @@ module Todo::Commands::Printable
 
   def format_todo(todo, indent:, id_width:)
     right_aligned_id = todo.id.to_s.rjust(id_width, " ")
+
     decorated_title =
       case todo.state
       when :undone then todo.title
-      when :waiting then "\e[2m#{todo.title}\e[0m" # dim
-      when :done then "\e[2;9m#{todo.title}\e[0m" # dim + strikethrough
+      when :waiting then "\e[2m#{todo.title}" # dim
+      when :done then "\e[2;9m#{todo.title}" # dim + strikethrough
       end
-    "#{indent}#{right_aligned_id} | #{decorated_title}"
+
+    decorated_tags = todo.tags
+      .map { |tag| "\e[36m##{tag}" }
+      .join(" ")
+
+    result = "#{indent}#{right_aligned_id} | #{decorated_title}"
+    result += " #{decorated_tags}" unless todo.tags.empty?
+    result += "\e[0m" if [:waiting, :done].include?(todo.state) || !todo.tags.empty?
+    result
   end
 end
