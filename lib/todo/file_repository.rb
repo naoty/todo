@@ -44,10 +44,12 @@ class Todo::FileRepository
     encoded_todo = encode(todo)
     todo_path.open("wb") { |file| file.puts(encoded_todo) }
 
-    insert_index = case position
-      when nil then -1
-      when ..0 then position
-      else position - 1
+    if position.nil?
+      insert_index = -1
+    elsif position <= 0
+      insert_index = position
+    else
+      insert_index = position - 1
     end
 
     index = load_index
