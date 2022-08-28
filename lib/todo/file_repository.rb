@@ -4,7 +4,7 @@ require "pathname"
 require "yaml"
 
 class Todo::FileRepository
-  private attr_reader :root_path, :error_output
+  attr_reader :root_path, :error_output
 
   def initialize(root_path:, error_output:)
     @root_path = Pathname.new(root_path)
