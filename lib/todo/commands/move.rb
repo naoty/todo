@@ -3,7 +3,7 @@ class Todo::Commands::Move < Todo::Commands::Command
     Usage:
       todo move <id> <position> (-p | --parent <parent id>)
       todo move -h | --help
-    
+
     Options:
       -h --help  Show thid message
   TEXT
@@ -11,26 +11,32 @@ class Todo::Commands::Move < Todo::Commands::Command
   def run(repository:)
     result = parse_arguments
 
-    case result
-    in { help: true }
+    if result.has_key?(:help)
       output.puts(HELP_MESSAGE)
       return
-    in { invalid_id: id }
-      error_output.puts("id is invalid: #{id}")
+    elsif result.has_key?(:invalid_id)
+      error_output.puts("id is invalid: #{result[:invalid_id]}")
       exit 1
-    in { invalid_position: position }
-      error_output.puts("position is invalid: #{position}")
+    elsif result.has_key?(:invalid_position)
+      error_output.puts("position is invalid: #{result[:invalid_position]}")
       exit 1
-    in { empty_parent_id: true }
+    elsif result.has_key?(:empty_parent_id)
       error_output.puts("parent id is empty")
       exit 1
-    in { invalid_parent_id: parent_id }
-      error_output.puts("parent id is invalid: #{parent_id}")
+    elsif result.has_key?(:invalid_parent_id)
+      error_output.puts("parent id is invalid: #{result[:invalid_parent_id]}")
       exit 1
-    in { id: id, position: position, parent_id: parent_id }
-      repository.move(id: id.to_i, parent_id: parent_id.to_i, position: position.to_i)
-    in { id: id, position: position }
-      repository.move(id: id.to_i, position: position.to_i)
+    elsif [:id, :position, :parent_id].all? { |key| result.has_key?(key) }
+      repository.move(
+        id: result[:id].to_i,
+        parent_id: result[:parent_id].to_i,
+        position: result[:position].to_i
+      )
+    elsif [:id, :position].all? { |key| result.has_key?(key) }
+      repository.move(
+        id: result[:id].to_i,
+        position: result[:position].to_i
+      )
     else
       error_output.puts(HELP_MESSAGE)
       exit 1

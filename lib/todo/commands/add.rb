@@ -13,18 +13,17 @@ class Todo::Commands::Add < Todo::Commands::Command
 
   def run(repository:)
     result = parse_arguments(arguments)
-    case result
-    in { help: true }
+    if result.has_key?(:help)
       output.puts(HELP_MESSAGE)
       return
-    in { tags: tags, position: position, parent_id: parent_id, title: title, open: open_flag }
+    elsif [:tags, :position, :parent_id, :title, :open].all? { |key| result.has_key?(key) }
       todo = repository.create(
-        title: title,
-        tags: tags,
-        position: position,
-        parent_id: parent_id&.to_i
+        title: result[:title],
+        tags: result[:tags],
+        position: result[:position],
+        parent_id: result[:parent_id]&.to_i
       )
-      repository.open(id: todo.id) if open_flag
+      repository.open(id: todo.id) if result[:open]
     else
       error_output.puts(HELP_MESSAGE)
       exit 1
