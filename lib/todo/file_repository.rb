@@ -4,10 +4,11 @@ require "pathname"
 require "yaml"
 
 class Todo::FileRepository
-  attr_reader :root_path, :error_output
+  attr_reader :root_path, :opener, :error_output
 
-  def initialize(root_path:, error_output:)
+  def initialize(root_path:, opener:, error_output:)
     @root_path = Pathname.new(root_path)
+    @opener = opener
     @error_output = error_output
 
     setup
@@ -209,7 +210,7 @@ class Todo::FileRepository
       return
     end
 
-    system("open #{todo_path}")
+    system("#{opener} #{todo_path}")
   end
 
   private

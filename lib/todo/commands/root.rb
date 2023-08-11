@@ -36,9 +36,15 @@ class Todo::Commands::Root < Todo::Commands::Command
       return
     end
 
+    if !ENV.has_key?("TODOS_EDITOR") && !ENV.has_key?("EDITOR")
+      error_output.puts('EDITOR or TODOS_EDITOR is required')
+      return
+    end
+
     command = build_command(name: arguments.first, arguments: arguments[1..])
     repository = Todo::FileRepository.new(
       root_path: ENV["TODOS_PATH"] || default_root_path,
+      opener: ENV["TODOS_EDITOR"] || ENV["EDITOR"],
       error_output: error_output
     )
     command.run(repository: repository)
