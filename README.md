@@ -19,6 +19,7 @@ $ gem install todo --version "<version>" --source "https://rubygems.pkg.github.c
 
 ## Environment variables
 * `TODOS_PATH`: The root path of TODO files (default: `$HOME/.todos`)
+* `EDITOR`, `TODOS_EDITOR`: The editor to open TODO files
 
 ## Auto completion
 
