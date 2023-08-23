@@ -4,7 +4,7 @@ module Todo::Commands
   autoload :Add, "todo/commands/add"
   autoload :Archive, "todo/commands/archive"
   autoload :Root, "todo/commands/root"
-  autoload :Delete, "todo/commands/Delete"
+  autoload :Delete, "todo/commands/delete"
   autoload :List, "todo/commands/list"
   autoload :Move, "todo/commands/move"
   autoload :Open, "todo/commands/open"
