@@ -24,7 +24,11 @@ RSpec.describe Todo::FileRepository do
     context "when index file doesn't exist" do
       it "creates index file" do
         expect {
-          Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+          Todo::FileRepository.new(
+            root_path: Pathname.pwd,
+            opener: "open",
+            error_output: error_output,
+          )
         }.to change { index_path.exist? }.from(false).to(true)
 
         index = JSON.parse(index_path.read, symbolize_names: true)
@@ -58,7 +62,11 @@ RSpec.describe Todo::FileRepository do
       end
 
       it "doesn't overwrite" do
-        Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+        Todo::FileRepository.new(
+          root_path: Pathname.pwd,
+          opener: "open",
+          error_output: error_output,
+        )
         expect(index_path.read.chomp).to eq(index_json)
       end
     end
@@ -66,7 +74,11 @@ RSpec.describe Todo::FileRepository do
     context "when archived directory doesn't exist" do
       it "creates archived directory" do
         expect {
-          Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+          Todo::FileRepository.new(
+            root_path: Pathname.pwd,
+            opener: "open",
+            error_output: error_output,
+          )
         }.to change { archived_path.exist? }.from(false).to(true)
         expect(archived_path).to be_directory
       end
@@ -79,16 +91,24 @@ RSpec.describe Todo::FileRepository do
 
       it "doesn't raise any errors" do
         expect {
-          Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+          Todo::FileRepository.new(
+            root_path: Pathname.pwd,
+            opener: "open",
+            error_output: error_output,
+          )
         }.not_to raise_error
       end
     end
   end
 
   describe "#list" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     let(:todo_id) { 1 }
     let(:todo_path) { Pathname.pwd.join("#{todo_id}.md") }
@@ -331,9 +351,13 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#create" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     shared_context "when title includes square brackets" do
       let(:title) { "[dummy]" }
@@ -713,9 +737,13 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#delete" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     let!(:todo) { repository.create(title: "dummy") }
     let!(:subtodo) { repository.create(title: "dummy", parent_id: todo.id) }
@@ -768,9 +796,13 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#update" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     let!(:todo) { repository.create(title: "dummy") }
     let!(:subtodo) { repository.create(title: "dummy", parent_id: todo.id) }
@@ -812,9 +844,13 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#archive" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     let(:todo_id) { 1 }
     let(:todo_path) { Pathname.pwd.join("#{todo_id}.md") }
@@ -1033,9 +1069,13 @@ RSpec.describe Todo::FileRepository do
   end
 
   describe "#move" do
-    let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
-    end
+  let!(:repository) do
+    Todo::FileRepository.new(
+      root_path: Pathname.pwd,
+      opener: "open",
+      error_output: error_output,
+    )
+  end
 
     before do
       index_path.open("wb") do |file|
@@ -1108,7 +1148,11 @@ RSpec.describe Todo::FileRepository do
 
   describe "#open" do
     let!(:repository) do
-      Todo::FileRepository.new(root_path: Pathname.pwd, error_output: error_output)
+      Todo::FileRepository.new(
+        root_path: Pathname.pwd,
+        opener: "open",
+        error_output: error_output,
+      )
     end
 
     context "when a todo with given ID exists" do
